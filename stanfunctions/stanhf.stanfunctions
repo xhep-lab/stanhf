@@ -1,0 +1,7 @@
+real poisson_real_lpdf(vector k, vector lambda) {
+  return sum(k .* log(lambda) - lambda - lgamma(k + 1));
+}
+
+vector interp_linear(real alpha, vector lo, vector hi) {
+  return alpha .* (hi - lo) + lo;
+}
