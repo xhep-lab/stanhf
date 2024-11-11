@@ -1,2 +1,2 @@
 pip install cmdstanpy
-python ./examples/stanhf.py
+python -m src.stanhf ./examples/example.json

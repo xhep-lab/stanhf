@@ -30,8 +30,8 @@ class Convert:
     def __init__(self, hf_json_file_name):
         self.hf_json_file_name = hf_json_file_name
 
-        with open(hf_json_file_name, encoding="utf-8") as hff:
-            self.workspace = json.load(hff)
+        with open(hf_json_file_name, encoding="utf-8") as hf_file:
+            self.workspace = json.load(hf_file)
 
     def metadata(self):
         hf_version = self.workspace.get("version")
@@ -71,11 +71,11 @@ class Convert:
 
     @property
     def data(self):
-        return self.samples + self.channels + self.measureds + self.modifiers + self.pars
+        return self.samples + self.measureds + self.modifiers + self.pars + self.channels
 
     def functions_block(self):
-        with open(STAN_FUNCTIONS, encoding="utf-8") as sff:
-            functions = sff.read()
+        with open(STAN_FUNCTIONS, encoding="utf-8") as sf_file:
+            functions = sf_file.read()
         return block("functions", [f"// [{STAN_FUNCTIONS}]", functions])
 
     def data_block(self):
@@ -118,8 +118,8 @@ class Convert:
     def write_stan_file(self, file_name, overwrite=True):
 
         if overwrite or not os.path.isfile(file_name):
-            with open(file_name, "w", encoding="utf-8") as stf:
-                stf.write(self.to_stan())
+            with open(file_name, "w", encoding="utf-8") as stan_file:
+                stan_file.write(self.to_stan())
 
             try:
                 format_stan_file(file_name, overwrite_file=True, backup=False)

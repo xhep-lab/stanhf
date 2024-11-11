@@ -214,10 +214,10 @@ def find_modifier(modifier, *args, **kwargs):
 
 def order_modifiers(modifiers):
     """
-    @returns Additive modifiers brought to front
+    @returns Additive modifiers are applied at end
     """
     add = [a for a in modifiers if isinstance(a, CorrelatedBinWiseAdditive)]
     other = [
         a for a in modifiers if not isinstance(
             a, CorrelatedBinWiseAdditive)]
-    return add + other
+    return other + add
