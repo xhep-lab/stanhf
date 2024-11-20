@@ -45,6 +45,13 @@ class Modifier(Stan):
         @returns Sampling bounds for parameter
         """
 
+    @property
+    def additive(self):
+        """
+        @returns Whether modifier is additive (cf. multiplicative)
+        """
+        return False
+
 
 class Factor(Modifier):
     """
@@ -197,6 +204,7 @@ class HistoSys(Modifier):
     """
     A bin-wise additive modifier from interpolation
     """
+    additive = True
     par_size = 0
     par_init = 0.
     par_bound = [[-5., 5.]]
@@ -370,6 +378,6 @@ def order_modifiers(modifiers):
     """
     @returns Modifiers, but with additive modifiers applied first
     """
-    add = [m for m in modifiers if m.type == "histosys"]
-    other = [m for m in modifiers if m.type != "histosys"]
+    add = [m for m in modifiers if m.additive]
+    other = [m for m in modifiers if not m.additive]
     return add + other
