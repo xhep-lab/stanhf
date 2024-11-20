@@ -35,7 +35,7 @@ class Sample(Stan):
         """
         @returns Ordered modifiers associated with this sample
 
-        Ordered such that additive are first and repeated type/name modifiers are 
+        Ordered such that additive are first and repeated type/name modifiers are
         overwritten
         """
         modifiers = [

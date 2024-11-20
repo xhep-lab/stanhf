@@ -36,7 +36,7 @@ class Measured(Stan):
         @returns Normal log-likelihood for modifier
         """
         return add_to_target("normal_lpdf", self.par_name,
-                            f"{self.normal_data_name}.1", f"{self.normal_data_name}.2")
+                             f"{self.normal_data_name}.1", f"{self.normal_data_name}.2")
 
     @trace
     def stan_data_card(self):

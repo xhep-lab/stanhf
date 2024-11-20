@@ -45,6 +45,7 @@ class Modifier(Stan):
         @returns Sampling bounds for parameter
         """
 
+
 class Factor(Modifier):
     """
     Scale a sample by a factor

@@ -60,7 +60,7 @@ def merge(list_):
     """
     @returns Merged list of dictionaries & deepmerged metadata entries
     """
-    list_ = [l for l in list_ if l is not None]
+    list_ = [item for item in list_ if item is not None]
     merged = {k: v for d in list_ for k, v in d.items()}
     metadata = [d.get(METADATA, {}) for d in list_]
     merged[METADATA] = {k: v for d in metadata for k, v in d.items()}

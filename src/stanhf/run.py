@@ -14,7 +14,6 @@ from .stanstr import flatten
 from .tracer import METADATA
 
 
-
 def install(progress=True, **kwargs):
     """
     Install Stan if it doesn't exist already
@@ -122,7 +121,7 @@ def validate(root, rng=None):
     if stanhf_par_names != nhf_par_names:
         raise RuntimeError(
              "no agreement in parameter names: "
-            f"Stan = {stanhf_par_names} vs. pyhf = {nhf_par_names}")
+             f"Stan = {stanhf_par_names} vs. pyhf = {nhf_par_names}")
 
     with open(f"{root}_init.json", encoding="utf-8") as init_file:
         pars = json.load(init_file)
@@ -138,4 +137,4 @@ def validate(root, rng=None):
     if not np.isclose(stanhf_target, nhf_target):
         raise RuntimeError(
              "no agreement in target: "
-            f"Stan = {stanhf_target} vs. pyhf = {nhf_target} for pars = {pars}")
+             f"Stan = {stanhf_target} vs. pyhf = {nhf_target} for pars = {pars}")
