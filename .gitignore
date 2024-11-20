@@ -1,0 +1,9 @@
+*pyc
+src/stanhf.egg-info
+build
+examples/__pycache__
+examples/example
+examples/example.stan
+examples/example_data.json
+examples/example_init.json
+

@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[project]
+name = "stanhf"
+version = "0.1.1"
+authors = [{ name = "Andrew Fowlie", email = "andrew.j.fowlie@gmail.com" }]
+readme = "README.md"  
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "click",
+    "cmdstanpy",
+    "pyhf"
+]
+
+[project.scripts]
+stanhf = "stanhf:cli"
+
+[tool.setuptools.package-data]
+stanhf = ["stanhf.stanfunctions"]

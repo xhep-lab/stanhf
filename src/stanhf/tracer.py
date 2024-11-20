@@ -12,7 +12,7 @@ METADATA = "_metadata"
 
 def trace(func):
     """
-    @returns Append metadata about origin
+    @returns Result appended with metadata about origin
     """
     file_name = basename(func.__code__.co_filename)
     line = func.__code__.co_firstlineno

@@ -4,21 +4,39 @@ Running and validating converted models
 """
 
 import json
+import warnings
 
 import numpy as np
 import pyhf
-from cmdstanpy import CmdStanModel
+from cmdstanpy import CmdStanModel, compile_stan_file, install_cmdstan, cmdstan_path
 
-from .stanstr import flatten, squeeze
+from .stanstr import flatten
 from .tracer import METADATA
 
 
-def builder(root, **kwargs):
+
+def install(progress=True, **kwargs):
+    """
+    Install Stan if it doesn't exist already
+    """
+    try:
+        return cmdstan_path()
+    except ValueError as error:
+        warnings.warn(f"Stan not found --- {error}. Installing it.")
+        install_cmdstan(progress=progress, **kwargs)
+        return cmdstan_path()
+
+
+def build(root, cxx="clang++", cxx_optim_level=0, **kwargs):
     """
     @param root Root name for Stan files
-    @returns Stan model
     """
-    return CmdStanModel(stan_file=f"{root}.stan", **kwargs)
+    compile_stan_file(
+        f"{root}.stan",
+        cpp_options={
+            "O": cxx_optim_level,
+            "CXX": cxx},
+        **kwargs)
 
 
 class StanHf:
@@ -30,13 +48,19 @@ class StanHf:
         """
         @param root Root name for Stan files
         """
-        self.model = builder(root)
+        self.model = CmdStanModel(stan_file=f"{root}.stan", exe_file=root)
         self.data = f"{root}_data.json"
 
     def par_names(self):
-        return list(self.model.src_info()['parameters'].keys())
+        """
+        @returns Arbitrary order parameter names
+        """
+        return list(self.model.src_info()["parameters"].keys())
 
     def target(self, pars):
+        """
+        @returns Stan target function
+        """
         data_frame = self.model.log_prob(pars,
                                          data=self.data,
                                          jacobian=False, sig_figs=18)
@@ -60,28 +84,34 @@ class NativeHf:
         self.data = workspace.data(self.model)
 
     def par_names(self):
-        return self.model.config.parameters
+        """
+        @returns Ordered parameter names
+        """
+        return self.model.config.par_order
 
     def target(self, pars):
+        """
+        @returns pyhf target function
+        """
         pars = flatten([pars[k] for k in self.par_names()])
         return self.model.logpdf(pars, self.data)[0]
 
 
-def perturb(x, scale=0.01, rng=None):
+def perturb(param, scale=0.01, rng=None):
     """
     @param x Parameter to be pertubed
-    @returns Parameter perturbed by random standard normal deviate
+    @returns Parameter perturbed by random normal deviate
     """
     if rng is None:
         rng = np.random.default_rng()
 
-    p = x + scale * rng.standard_normal(np.size(x))
-    return squeeze(p)
+    pertubed = param + scale * rng.standard_normal(np.size(param))
+    return pertubed.reshape(np.shape(param)).tolist()
 
-def validator(root, rng=None):
+
+def validate(root, rng=None):
     """
-    @param root Root name for Stan files
-    @raises if disagreement between target in Stan and pyhf
+    @param root Root name for model files that will be checked
     """
     stanhf = StanHf(root)
     nhf = NativeHf(root)
@@ -91,9 +121,10 @@ def validator(root, rng=None):
 
     if stanhf_par_names != nhf_par_names:
         raise RuntimeError(
-            f"no agreement in parameter names: Stan = {stanhf_par_names} vs. pyhf = {nhf_par_names}")
+             "no agreement in parameter names: "
+            f"Stan = {stanhf_par_names} vs. pyhf = {nhf_par_names}")
 
-    with open(f'{root}_init.json', encoding="utf-8") as init_file:
+    with open(f"{root}_init.json", encoding="utf-8") as init_file:
         pars = json.load(init_file)
 
     pars.pop(METADATA)
@@ -106,4 +137,5 @@ def validator(root, rng=None):
 
     if not np.isclose(stanhf_target, nhf_target):
         raise RuntimeError(
-            f"no agreement in target: Stan = {stanhf_target} vs. pyhf = {nhf_target} for pars = {pars}")
+             "no agreement in target: "
+            f"Stan = {stanhf_target} vs. pyhf = {nhf_target} for pars = {pars}")

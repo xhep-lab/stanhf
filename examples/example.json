@@ -1,0 +1,26 @@
+{
+    "channels": [
+        { "name": "singlechannel",
+          "samples": [
+            { "name": "signal",
+              "data": [5.0, 10.0],
+              "modifiers": [ 
+                { "name": "k_histosys", "type": "histosys", "data": {"hi_data": [20,15], "lo_data": [1, 1]}}
+              ]
+            }
+          ]
+        }
+    ],
+    "observations": [
+        { "name": "singlechannel", "data": [50.0, 60.0] }
+    ],
+    "measurements": [
+        { "name": "Measurement", "config":
+          {"poi": "k_histosys", "parameters": [ 
+            { "name":"k_histosys", "inits":[1.5], "bounds": [[1, 2]] }
+          ]
+          }
+        }
+    ],
+    "version": "1.0.0"
+}
