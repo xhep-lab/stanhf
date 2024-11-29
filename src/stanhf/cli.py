@@ -8,13 +8,14 @@ import importlib.metadata
 import click
 from cmdstanpy import cmdstan_path
 
-from . import install, build, convert, validate
+from .run import install, build, validate
+from .convert import convert
 
 
 VERSION = importlib.metadata.version(__package__)
 
 
-def print_cmdstan_path(ctx, param, value):
+def print_cmdstan_path(ctx, _, value):
     """
     Print cmdstan path
     """
@@ -29,7 +30,8 @@ def print_cmdstan_path(ctx, param, value):
 @click.version_option(VERSION, message="%(version)s")
 @click.option('--overwrite/--no-overwrite', default=True,
               help="Overwrite exising files.")
-@click.option('--cmdstan-path', is_flag=True, callback=print_cmdstan_path, expose_value=False, is_eager=True)
+@click.option('--cmdstan-path', is_flag=True, callback=print_cmdstan_path,
+              expose_value=False, is_eager=True)
 def cli(hf_json_file_name, overwrite):
     """
     Convert, build and validate HF_JSON_FILE_NAME as a Stan model.
