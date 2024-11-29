@@ -27,3 +27,6 @@ stanhf = "stanhf:cli"
 
 [tool.setuptools.package-data]
 stanhf = ["stanhf.stanfunctions"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
