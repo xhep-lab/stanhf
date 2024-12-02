@@ -198,7 +198,6 @@ class Convert:
         """
         Write Stan program to a file
         """
-
         if overwrite or not os.path.isfile(file_name):
             with open(file_name, "w", encoding="utf-8") as stan_file:
                 stan_file.write(self.to_stan())
@@ -212,7 +211,6 @@ class Convert:
         """
         Write Stan data to a file
         """
-
         if overwrite or not os.path.isfile(file_name):
             write_stan_json(file_name, self.data_card())
             jlint(file_name)
