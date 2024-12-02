@@ -5,41 +5,47 @@ Test elements of converter from hf to Stan
 
 import os
 
+import pytest
+
 from stanhf import Convert
 
 
 CWD = os.path.dirname(os.path.realpath(__file__))
-EXAMPLE = os.path.join(CWD, "..", "examples", "example.json")
+EXAMPLE = os.path.normpath(os.path.join(CWD, "..", "examples", "example.json"))
 
-con = Convert(EXAMPLE)
+CON = Convert(EXAMPLE)
+BLOCKS = ["functions_block", "metadata", "data_block",
+          "transformed_data_block", "pars_block", "transformed_pars_block"]
 
 
-def test_functions():
-    con.functions_block()
+def write_expected(block):
+    """
+    Write expected block from example input
+    """
+    file_name = os.path.join(CWD, f"{block}.stan")
+    with open(file_name, "w", encoding="utf-8") as block_file:
+        block_file.write(call(block))
 
-def test_metadata():
-    con.metadata()
-    
-def test_data():
-    con.data_block()
 
-def test_transformed_data():
-    con.transformed_data_block()
+def call(block):
+    """
+    @returns Block found by converting input with commented lines removed
+    """
+    out = getattr(CON, block)()
+    return "\n".join(l for l in out.split("\n") if not l.startswith("//"))
 
-def test_pars():
-    con.pars_block()
 
-def test_transformed_pars():
-    con.transformed_pars_block()
+@pytest.mark.parametrize("block", BLOCKS)
+def test_attribute(block):
+    """
+    @returns Test whether conversion agrees with expected result on disk
+    """
+    file_name = os.path.join(CWD, f"{block}.stan")
+    with open(file_name, "r", encoding="utf-8") as block_file:
+        expected = block_file.read()
+    assert call(block) == expected
 
-def test_model():
-    con.model_block()
 
-def test_generated_quantities():
-    con.generated_quantities_block()
-
-def test_data_card():
-    con.data_card()
-
-def test_init_card():
-    con.init_card()
+if __name__ == "__main__":
+    for b in BLOCKS:
+        write_expected(b)
