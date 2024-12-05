@@ -6,7 +6,7 @@ Including measurements, initial choices of parameters and bounds.
 """
 
 from .stanabc import Stan
-from .stanstr import join, add_to_target, read_par_bound, read_par_init
+from .stanstr import join, add_to_target, read_par_bound
 from .tracer import trace
 
 
