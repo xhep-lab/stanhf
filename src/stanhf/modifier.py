@@ -58,7 +58,7 @@ class Factor(Modifier):
     Scale a sample by a factor
     """
     par_size = 0
-    par_init = 1.
+    par_init = [1.]
     par_bound = [[0., 10.]]
 
     @trace
@@ -206,7 +206,7 @@ class HistoSys(Modifier):
     """
     additive = True
     par_size = 0
-    par_init = 0.
+    par_init = [0.]
     par_bound = [[-5., 5.]]
 
     def __init__(self, modifier, sample):
@@ -244,7 +244,7 @@ class NormSys(Modifier):
     A bin-wise multiplicative modifier from interpolation
     """
     par_size = 0
-    par_init = 0.
+    par_init = [0.]
     par_bound = [[-5., 5.]]
 
     def __init__(self, modifier, sample):
