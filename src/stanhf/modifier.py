@@ -214,7 +214,7 @@ class HistoSys(Modifier):
         self.lu_name = join("lu", self.name)
         self.lu_data = (modifier["data"]["lo_data"], modifier["data"]["hi_data"])
 
-        if self.lu_data[0] == self.lu_data[1] == self.sample.nominal:
+        if self.lu_data[0] == self.lu_data[1]:
             warnings.warn(f"modifier {self.name} may have no effect")
 
     @trace
@@ -252,9 +252,7 @@ class NormSys(Modifier):
         self.lu_name = join("lu", self.name)
         self.lu_data = (modifier["data"]["lo"], modifier["data"]["hi"])
 
-        nominal = [1.] * len(self.lu_data[0])
-
-        if self.lu_data[0] == self.lu_data[1] == nominal:
+        if self.lu_data[0] == self.lu_data[1]:
             warnings.warn(f"modifier {self.name} may have no effect")
 
     @trace
