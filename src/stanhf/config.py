@@ -59,7 +59,7 @@ class Parameter(Stan):
         self.par_name = modifier.par_name
         self.par_size = modifier.par_size
         par_init = config.get("inits", modifier.par_init)
-        self.par_init = par_init
+        self.par_init = read_par_init(par_init, self.par_size)
         par_bound = config.get("bounds", modifier.par_bound)
         self.par_bound = read_par_bound(par_bound, self.par_size)
         self.par_bound_name = join("lu", self.par_name)

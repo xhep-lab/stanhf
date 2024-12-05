@@ -86,6 +86,15 @@ def read_par_bound(bound, size):
     return ([b[0] for b in bound], [b[1] for b in bound])
 
 
+def read_par_init(init, size):
+    """
+    @returns Parameter initial value as scalar if required
+    """
+    if size == 0:
+        return init[0]
+    return init
+
+
 def read_observed(observed):
     """
     @returns Parameter initial value as scalar if required
