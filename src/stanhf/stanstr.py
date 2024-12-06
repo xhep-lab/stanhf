@@ -22,8 +22,6 @@ def add_to_target(dist, var, *args):
     """
     @returns Stan contribution to target
     """
-    if "lupdf" not in dist and "lupmf" not in dist:
-        warnings.warn(f"using normalized pmf/pdf: {dist}")
     if not args:
         return f"target += {dist}({var});"
     joined = ", ".join([str(a) for a in args])
@@ -102,6 +100,7 @@ def read_observed(observed):
     int_observed = [int(o) for o in observed]
 
     if int_observed != observed:
-        warnings.warn(f"observed converted to integer: {int_observed} vs. {observed}")
+        warnings.warn(
+            f"observed converted to integer: {int_observed} vs. {observed}")
 
     return int_observed

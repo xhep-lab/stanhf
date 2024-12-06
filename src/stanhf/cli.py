@@ -4,12 +4,13 @@ CLI for stanhf
 """
 
 import importlib.metadata
+import os
 
 import click
 from cmdstanpy import cmdstan_path
 
 from .run import install, build, validate
-from .convert import convert
+from .convert import convert, par_names
 
 
 VERSION = importlib.metadata.version(__package__)
@@ -39,13 +40,20 @@ def cli(hf_json_file_name, overwrite):
     stan_path = install()
     print(f"- Stan installed at {stan_path}")
 
+    local = os.path.join(stan_path, "build", "local")
+    print(f"- Build settings controlled at {local}")
+
     root = convert(hf_json_file_name, overwrite)
     print(f"- Stan model files created at {root}*")
+
+    par, fixed, null = par_names(hf_json_file_name)
+    print(
+        f"- Identified {len(par)} parameters, {len(fixed)} fixed parameters and {len(null)} null parameters")
 
     build(root)
     print(f"- Stan executable created at {root}")
 
-    validate(root)
+    validate(root, par, fixed, null)
     print("- Validated parameter names & target")
 
     cmd = f"{root} sample num_chains=4 data file={root}_data.json init={root}_init.json"

@@ -47,7 +47,8 @@ class Sample(Stan):
         repeated = set(n for n in names if names.count(n) > 1)
 
         if repeated:
-            warnings.warn(f"repeated type/name modifiers are overwritten: {repeated}")
+            warnings.warn(
+                f"repeated type/name modifiers are overwritten: {repeated}")
 
         modifiers = {m.name: m for m in modifiers}.values()
         return order_modifiers(modifiers)

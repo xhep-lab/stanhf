@@ -52,6 +52,13 @@ class Modifier(Stan):
         """
         return False
 
+    @property
+    def is_null(self):
+        """
+        @returns Whether modifier has no effect
+        """
+        return False
+
 
 class Factor(Modifier):
     """
@@ -212,10 +219,12 @@ class HistoSys(Modifier):
     def __init__(self, modifier, sample):
         super().__init__(modifier, sample)
         self.lu_name = join("lu", self.name)
-        self.lu_data = (modifier["data"]["lo_data"], modifier["data"]["hi_data"])
+        self.lu_data = (modifier["data"]["lo_data"],
+                        modifier["data"]["hi_data"])
 
-        if self.lu_data[0] == self.lu_data[1]:
-            warnings.warn(f"modifier {self.name} may have no effect")
+    @property
+    def is_null(self):
+        return self.lu_data[0] == self.lu_data[1] == self.sample.nominal
 
     @trace
     def stan_data(self):
@@ -241,7 +250,7 @@ class HistoSys(Modifier):
 
 class NormSys(Modifier):
     """
-    A bin-wise multiplicative modifier from interpolation
+    A multiplicative modifier from interpolation
     """
     par_size = 0
     par_init = [0.]
@@ -252,8 +261,9 @@ class NormSys(Modifier):
         self.lu_name = join("lu", self.name)
         self.lu_data = (modifier["data"]["lo"], modifier["data"]["hi"])
 
-        if self.lu_data[0] == self.lu_data[1]:
-            warnings.warn(f"modifier {self.name} may have no effect")
+    @property
+    def is_null(self):
+        return self.lu_data[0] == self.lu_data[1] == 1.
 
     @trace
     def stan_data(self):

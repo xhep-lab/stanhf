@@ -50,6 +50,7 @@ class Parameter(Stan):
     """
     Declare a parameter
     """
+    par_fixed = False
 
     def __init__(self, config, modifier):
         """
@@ -102,6 +103,7 @@ class FixedParameter(Stan):
     """
     Declare a fixed parameter
     """
+    par_fixed = True
 
     def __init__(self, config, modifier):
         """
@@ -149,7 +151,7 @@ def find_param(config, modifier):
     """
     @returns Parameter or fixed parameter
     """
-    if config.get("fix"):
+    if config.get("fixed"):
         return FixedParameter(config, modifier)
     return Parameter(config, modifier)
 

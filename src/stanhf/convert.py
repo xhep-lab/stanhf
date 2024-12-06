@@ -114,11 +114,27 @@ class Convert:
         return flatten(c.modifiers for c in self._channels)
 
     @property
+    def _non_null_modifiers(self):
+        """
+        @returns Non-null modifiers in hf
+        """
+        return [m for m in self._modifiers if not m.is_null]
+
+    def par_names(self):
+        """
+        @returns Names of parameters, fixed parameters and null parameters
+        """
+        par = [p.par_name for p in self._pars if not p.par_fixed]
+        fixed = [p.par_name for p in self._pars if p.par_fixed]
+        null = [m.par_name for m in self._modifiers if m.is_null]
+        return par, fixed, null
+
+    @property
     def _data(self):
         """
         @returns Representation of all elements in Stan program
         """
-        return self._samples + self._measureds + self._modifiers + \
+        return self._samples + self._measureds + self._non_null_modifiers + \
             self._pars + self._channels + self._constraints + self._staterror
 
     def functions_block(self):
@@ -237,3 +253,13 @@ def convert(hf_json_file, overwrite=True):
     convert_.write_stan_init_file(f"{root}_init.json", overwrite)
 
     return root
+
+
+def par_names(hf_json_file):
+    """
+    @param hf_json_file Name of hf file
+    @returns Names of parameters
+    """
+    root = os.path.splitext(hf_json_file)[0]
+    convert_ = Convert(hf_json_file)
+    return convert_.par_names()
