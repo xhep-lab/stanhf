@@ -260,6 +260,5 @@ def par_names(hf_json_file):
     @param hf_json_file Name of hf file
     @returns Names of parameters
     """
-    root = os.path.splitext(hf_json_file)[0]
     convert_ = Convert(hf_json_file)
     return convert_.par_names()

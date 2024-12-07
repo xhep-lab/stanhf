@@ -32,7 +32,7 @@ def call(block):
     @returns Block found by converting input with commented lines removed
     """
     out = getattr(CON, block)()
-    return "\n".join(l for l in out.split("\n") if not l.startswith("//"))
+    return "\n".join(line for line in out.split("\n") if not line.startswith("//"))
 
 
 @pytest.mark.parametrize("block", BLOCKS)
