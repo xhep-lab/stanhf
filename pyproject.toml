@@ -19,7 +19,7 @@ classifiers = [
 dependencies = [
     "click",
     "cmdstanpy",
-    "pyhf"
+    "pyhf[contrib]"
 ]
 
 [project.scripts]
