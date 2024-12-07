@@ -31,8 +31,8 @@ def print_cmdstan_path(ctx, _, value):
 @click.version_option(VERSION, message="%(version)s")
 @click.option('--overwrite/--no-overwrite', default=True,
               help="Overwrite existing files.")
-@click.option('--compile/--no-compile', default=True,
-              help="Compile Stan program.")
+@click.option('--build/--no-build', default=True,
+              help="Build Stan program.")
 @click.option('--cmdstan-path', is_flag=True, callback=print_cmdstan_path,
               expose_value=False, is_eager=True)
 def cli(hf_json_file_name, overwrite, build):
