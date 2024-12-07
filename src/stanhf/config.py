@@ -5,6 +5,8 @@ Parse configuaration from a hf model
 Including measurements, initial choices of parameters and bounds.
 """
 
+from abc import abstractmethod
+
 from .stanabc import Stan
 from .stanstr import join, add_to_target, read_par_bound, read_par_init
 from .tracer import trace
@@ -12,12 +14,12 @@ from .tracer import trace
 
 class Measured(Stan):
     """
-    Normal measurement of a modifier paramter
+    Normal measurement of a modifier parameter
     """
 
     def __init__(self, config):
         """
-        @param config hf configuaration data
+        @param config hf configuration data
         """
         self.par_name = config["name"]
         self.normal_data_name = join("normal", self.par_name)
@@ -47,6 +49,15 @@ class Measured(Stan):
 
 
 class Parameter(Stan):
+    @property
+    @abstractmethod
+    def par_fixed(self):
+        """
+        @returns Whether parameter was fixed
+        """
+
+
+class FreeParameter(Parameter):
     """
     Declare a parameter
     """
@@ -99,7 +110,7 @@ class Parameter(Stan):
         return {self.par_bound_name: self.par_bound}
 
 
-class FixedParameter(Stan):
+class FixedParameter(Parameter):
     """
     Declare a fixed parameter
     """
@@ -153,7 +164,7 @@ def find_param(config, modifier):
     """
     if config.get("fixed"):
         return FixedParameter(config, modifier)
-    return Parameter(config, modifier)
+    return FreeParameter(config, modifier)
 
 
 def find_params(config, modifiers):

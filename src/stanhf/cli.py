@@ -30,25 +30,31 @@ def print_cmdstan_path(ctx, _, value):
 @click.argument('hf_json_file_name', type=click.Path(exists=True))
 @click.version_option(VERSION, message="%(version)s")
 @click.option('--overwrite/--no-overwrite', default=True,
-              help="Overwrite exising files.")
+              help="Overwrite existing files.")
+@click.option('--build/--no-build', default=True,
+              help="Build Stan program.")
 @click.option('--cmdstan-path', is_flag=True, callback=print_cmdstan_path,
               expose_value=False, is_eager=True)
-def cli(hf_json_file_name, overwrite):
+def cli(hf_json_file_name, overwrite, build):
     """
     Convert, build and validate HF_JSON_FILE_NAME as a Stan model.
     """
+    root = convert(hf_json_file_name, overwrite)
+    print(f"- Stan model files created at {root}*")
+
+    if not build:
+        return
+
     stan_path = install()
     print(f"- Stan installed at {stan_path}")
 
     local = os.path.join(stan_path, "build", "local")
     print(f"- Build settings controlled at {local}")
 
-    root = convert(hf_json_file_name, overwrite)
-    print(f"- Stan model files created at {root}*")
-
     par, fixed, null = par_names(hf_json_file_name)
-    print(
-        f"- Identified {len(par)} parameters, {len(fixed)} fixed parameters and {len(null)} null parameters")
+    print(f"- Identified {len(par)} parameters,"
+          f" {len(fixed)} fixed parameters and"
+          f" {len(null)} null parameters")
 
     build(root)
     print(f"- Stan executable created at {root}")

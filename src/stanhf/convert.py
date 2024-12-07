@@ -74,7 +74,7 @@ class Convert:
         try:
             pars = self._workspace["measurements"][0]["config"]["parameters"]
         except (KeyError, IndexError):
-            warnings.warn("no configuaration data found")
+            warnings.warn("no configuration data found")
             return {}
         return {p["name"]: p for p in pars}
 
@@ -83,21 +83,21 @@ class Convert:
         """
         @returns Measurements for Stan program
         """
-        return find_measureds(self._config, self._modifiers)
+        return find_measureds(self._config, self._non_null_modifiers)
 
     @property
     def _pars(self):
         """
         @returns Parameters for Stan program
         """
-        return find_params(self._config, self._modifiers)
+        return find_params(self._config, self._non_null_modifiers)
 
     @property
     def _constraints(self):
         """
         @returns Constraints for Stan program
         """
-        return [find_constraint(self._modifiers)]
+        return [find_constraint(self._non_null_modifiers)]
 
     @property
     def _staterror(self):
@@ -220,8 +220,8 @@ class Convert:
 
             try:
                 format_stan_file(file_name, overwrite_file=True, backup=False)
-            except CalledProcessError as cpe:
-                warnings.warn(f"did not lint --- {str(cpe)}")
+            except (CalledProcessError, RuntimeError) as err:
+                warnings.warn(f"did not lint --- {str(err)}")
 
     def write_stan_data_file(self, file_name, overwrite=True):
         """
