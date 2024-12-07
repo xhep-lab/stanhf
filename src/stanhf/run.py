@@ -141,7 +141,7 @@ def validate(root, par, fixed, null, rng=None):
         raise RuntimeError(
             "no agreement in parameter names: "
             f"Stan = {stanhf_par} [{len(stanhf_par)}]"
-            f" vs. pyhf = {nhf_pars} [{len(nhf_par)}]")
+            f" vs. pyhf = {nhf_par} [{len(nhf_par)}]")
 
     with open(f"{root}_init.json", encoding="utf-8") as init_file:
         pars = json.load(init_file)
