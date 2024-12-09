@@ -54,6 +54,10 @@ def flatten(list_):
     return flat
 
 
+def hashed(list_):
+    return hash(e for e in flatten(list_))
+
+
 def merge(list_):
     """
     @returns Merged list of dictionaries & deepmerged metadata entries

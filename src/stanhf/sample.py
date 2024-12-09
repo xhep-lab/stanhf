@@ -5,6 +5,8 @@ Parse a sample
 
 import warnings
 
+from functools import cached_property
+
 from .stanabc import Stan
 from .stanstr import join
 from .modifier import find_modifier, order_modifiers
@@ -30,7 +32,7 @@ class Sample(Stan):
         self.par_name = join("expected", self.name)
         self.nominal_name = join("nominal", self.name)
 
-    @property
+    @cached_property
     def modifiers(self):
         """
         @returns Ordered modifiers associated with this sample
