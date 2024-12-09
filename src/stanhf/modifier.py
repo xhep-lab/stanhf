@@ -3,13 +3,14 @@ Parse a modifier from a hf model
 ================================
 """
 
-from abc import abstractmethod
 import warnings
+from abc import abstractmethod
+from functools import cached_property
 
 import numpy as np
 
 from .stanabc import Stan
-from .stanstr import join, add_to_target
+from .stanstr import join, add_to_target, hashed
 from .tracer import trace
 
 
@@ -147,15 +148,27 @@ class StatError(Modifier):
 class ShapeSys(Modifier):
     """
     Scale each bin in a sample by different factor, but constrain those factors by a Poisson
-    representing an auxilliary measurement
+    representing an auxiliary measurement
     """
+    this_data = {}
 
     def __init__(self, modifier, sample):
         super().__init__(modifier, sample)
         self.expected_name = join("expected", self.name)
         self.observed_name = join("observed", self.name)
-        self.rel_error_name = join("rel_error", self.name)
+        self.default_rel_error_name = join("rel_error", self.name)
         self.rel_error = modifier["data"]
+
+    @cached_property
+    def rel_error_name(self):
+        hash_ = hashed(self.rel_error)
+
+        if hash_ not in self.this_data:
+            if self.is_null:
+                return self.default_rel_error
+            self.this_data[hash_] = self.default_rel_error
+    
+        return self.this_data[hash_]
 
     @property
     def par_bound(self):
@@ -180,7 +193,7 @@ class ShapeSys(Modifier):
     @trace
     def stan_trans_data(self):
         """
-        @returns Data for auxilliary measurements of rate parameters
+        @returns Data for auxiliary measurements of rate parameters
         """
         return f"vector[{self.par_size}] {self.observed_name} = square({self.sample.nominal_name} ./ {self.rel_error_name});"
 
@@ -195,16 +208,18 @@ class ShapeSys(Modifier):
     @trace
     def stan_data(self):
         """
-        @returns Declare data for relative error in auxilliary measurement
+        @returns Declare data for relative error in auxiliary measurement
         """
-        return f"vector[{self.par_size}] {self.rel_error_name};"
+        if self.default_rel_error_name == self.rel_error_name:
+            return f"vector[{self.par_size}] {self.rel_error_name};"
 
     @trace
     def stan_data_card(self):
         """
         @returns Set data for standard deviation of normal
         """
-        return {self.rel_error_name: self.rel_error}
+        if self.default_rel_error_name == self.rel_error_name:
+            return {self.rel_error_name: self.rel_error}
 
 
 class HistoSys(Modifier):
@@ -215,12 +230,26 @@ class HistoSys(Modifier):
     par_size = 0
     par_init = [0.]
     par_bound = [[-5., 5.]]
+    
+    this_data = {}
 
     def __init__(self, modifier, sample):
         super().__init__(modifier, sample)
-        self.lu_name = join("lu", self.name)
+
         self.lu_data = (modifier["data"]["lo_data"],
                         modifier["data"]["hi_data"])
+        self.default_lu_name = join("lu", self.name)
+
+    @cached_property
+    def lu_name(self):
+        hash_ = hashed(self.lu_data)
+
+        if hash_ not in self.this_data:
+            if self.is_null:
+                return self.default_lu_name
+            self.this_data[hash_] = self.default_lu_name
+    
+        return self.this_data[hash_]
 
     @property
     def is_null(self):
@@ -231,14 +260,16 @@ class HistoSys(Modifier):
         """
         @returns Declare one-sigma lower and upper values for additive corrections
         """
-        return f"tuple(vector[{self.sample.nbins}], vector[{self.sample.nbins}]) {self.lu_name};"
+        if self.lu_name == self.default_lu_name:
+            return f"tuple(vector[{self.sample.nbins}], vector[{self.sample.nbins}]) {self.lu_name};"
 
     @trace
     def stan_data_card(self):
         """
         @returns Set data for one-sigma lower and upper values for additive corrections
         """
-        return {self.lu_name: self.lu_data}
+        if self.lu_name == self.default_lu_name:
+            return {self.lu_name: self.lu_data}
 
     @trace
     def stan_trans_pars(self):
@@ -255,11 +286,25 @@ class NormSys(Modifier):
     par_size = 0
     par_init = [0.]
     par_bound = [[-5., 5.]]
+    
+    this_data = {}
 
     def __init__(self, modifier, sample):
         super().__init__(modifier, sample)
-        self.lu_name = join("lu", self.name)
         self.lu_data = (modifier["data"]["lo"], modifier["data"]["hi"])
+
+        self.default_lu_name = join("lu", self.name)
+
+    @cached_property
+    def lu_name(self):
+        hash_ = hashed(self.lu_data)
+
+        if hash_ not in self.this_data:
+            if self.is_null:
+                return self.default_lu_name
+            self.this_data[hash_] = self.default_lu_name
+    
+        return self.this_data[hash_]
 
     @property
     def is_null(self):
@@ -270,14 +315,16 @@ class NormSys(Modifier):
         """
         @returns Declare one-sigma lower and upper values for mulitplicative corrections
         """
-        return f"tuple(real, real) {self.lu_name};"
+        if self.lu_name == self.default_lu_name:
+            return f"tuple(real, real) {self.lu_name};"
 
     @trace
     def stan_data_card(self):
         """
         @returns Set data for one-sigma lower and upper values for mulitplicative corrections
         """
-        return {self.lu_name: self.lu_data}
+        if self.lu_name == self.default_lu_name:
+            return {self.lu_name: self.lu_data}
 
     @trace
     def stan_trans_pars(self):
