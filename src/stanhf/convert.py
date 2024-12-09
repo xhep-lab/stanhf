@@ -8,6 +8,7 @@ import json
 import os
 import warnings
 from subprocess import CalledProcessError
+from functools import cached_property
 
 from cmdstanpy import format_stan_file, write_stan_json
 
@@ -45,28 +46,28 @@ class Convert:
                    // histfactory spec version {hf_version}
                    // converted with stanhf {VERSION}"""
 
-    @property
+    @cached_property
     def _samples(self):
         """
         @returns Samples for all channels
         """
         return flatten(c.samples for c in self._channels)
 
-    @property
+    @cached_property
     def _observed(self):
         """
         @returns Observed counts for each channel
         """
         return {k["name"]: read_observed(k["data"]) for k in self._workspace["observations"]}
 
-    @property
+    @cached_property
     def _channels(self):
         """
         @returns All channels
         """
         return [Channel(c, self._observed[c["name"]]) for c in self._workspace["channels"]]
 
-    @property
+    @cached_property
     def _config(self):
         """
         @returns Configuration block from hf program
@@ -78,48 +79,49 @@ class Convert:
             return {}
         return {p["name"]: p for p in pars}
 
-    @property
+    @cached_property
     def _measureds(self):
         """
         @returns Measurements for Stan program
         """
         return find_measureds(self._config, self._non_null_modifiers)
 
-    @property
+    @cached_property
     def _pars(self):
         """
         @returns Parameters for Stan program
         """
         return find_params(self._config, self._non_null_modifiers)
 
-    @property
+    @cached_property
     def _constraints(self):
         """
         @returns Constraints for Stan program
         """
         return [find_constraint(self._non_null_modifiers)]
 
-    @property
+    @cached_property
     def _staterror(self):
         """
         @returns Combined statistical error constraints for Stan program
         """
         return flatten([find_staterror(c) for c in self._channels])
 
-    @property
+    @cached_property
     def _modifiers(self):
         """
         @returns Modifiers in hf
         """
         return flatten(c.modifiers for c in self._channels)
 
-    @property
+    @cached_property
     def _non_null_modifiers(self):
         """
         @returns Non-null modifiers in hf
         """
         return [m for m in self._modifiers if not m.is_null]
 
+    @cached_property
     def par_names(self):
         """
         @returns Names of parameters, fixed parameters and null parameters
@@ -129,7 +131,7 @@ class Convert:
         null = [m.par_name for m in self._modifiers if m.is_null]
         return par, fixed, null
 
-    @property
+    @cached_property
     def _data(self):
         """
         @returns Representation of all elements in Stan program
@@ -252,13 +254,4 @@ def convert(hf_json_file, overwrite=True):
     convert_.write_stan_data_file(f"{root}_data.json", overwrite)
     convert_.write_stan_init_file(f"{root}_init.json", overwrite)
 
-    return root
-
-
-def par_names(hf_json_file):
-    """
-    @param hf_json_file Name of hf file
-    @returns Names of parameters
-    """
-    convert_ = Convert(hf_json_file)
-    return convert_.par_names()
+    return root, *convert_.par_names

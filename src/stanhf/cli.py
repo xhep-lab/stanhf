@@ -10,7 +10,7 @@ import click
 from cmdstanpy import cmdstan_path
 
 from .run import install, build as stan_build, validate
-from .convert import convert, par_names
+from .convert import convert
 
 
 VERSION = importlib.metadata.version(__package__)
@@ -39,11 +39,9 @@ def cli(hf_json_file_name, overwrite, build):
     """
     Convert, build and validate HF_JSON_FILE_NAME as a Stan model.
     """
-    root = convert(hf_json_file_name, overwrite)
-    print(f"- Stan model files created at {root}*")
-
-    par, fixed, null = par_names(hf_json_file_name)
-    print(f"- Identified {len(par)} parameters,"
+    root, par, fixed, null = convert(hf_json_file_name, overwrite)
+    print(f"- Stan model files created at {root}*\n"
+          f"- Identified {len(par)} parameters,"
           f" {len(fixed)} fixed parameters and"
           f" {len(null)} null parameters")
 
