@@ -1,5 +1,13 @@
+#ifndef STANHF_EXTERN_HPP_
+#define STANHF_EXTERN_HPP_
+
 #include <ostream>
 #include <stan/math.hpp>
+
+template <typename T> using Vector = Eigen::VectorX<T>;
+template <typename T> using tuple = std::tuple<T, T>;
+template <typename T> using map = Eigen::Map<T>;
+
 
 template <typename T, typename U>
 U poisson_real_lpdf(const T &k, const T &lambda, std::ostream *pstream__) {
@@ -11,15 +19,11 @@ U poisson_real_lpdf(const T &k, const T &lambda, std::ostream *pstream__) {
   return r;
 }
 
-template <typename T> using Vector = Eigen::VectorX<T>;
 
-template <typename T> using tuple = std::tuple<T, T>;
-
-template <typename T> using map = Eigen::Map<Vector<T>>;
 
 template <typename T, typename U, typename V>
-Vector<T> term_interp(const T &alpha, const map<U> &x,
-                      const tuple<Vector<V>> &lu, std::ostream *pstream__) {
+Eigen::VectorX<T> term_interp(const T &alpha, const map<Eigen::VectorX<U>> &x,
+                      const tuple<Eigen::VectorX<V>> &lu, std::ostream *pstream__) {
 
   const auto l = std::get<0>(lu);
   const auto u = std::get<1>(lu);
@@ -83,3 +87,5 @@ U factor_interp(U alpha, tuple<V> lu, std::ostream *pstream__) {
 
   return 1. + r.transpose() * m * b;
 }
+
+#endif // STANHF_EXTERN_HPP_
