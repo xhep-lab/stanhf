@@ -55,7 +55,10 @@ def flatten(list_):
 
 
 def hashed(list_):
-    return hash(e for e in flatten(list_))
+    """
+    @returns Hash of nested lists
+    """
+    return hash(repr(list_))
 
 
 def merge(list_):
