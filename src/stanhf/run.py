@@ -15,9 +15,6 @@ from .stanstr import flatten
 from .tracer import METADATA
 
 
-CWD = os.path.dirname(os.path.realpath(__file__))
-EXTERN = os.path.join(CWD, "extern.hpp")
-
 
 def install(progress=True, **kwargs):
     """
@@ -35,7 +32,7 @@ def build(root, **kwargs):
     """
     @param root Root name for Stan files
     """
-    compile_stan_file(f"{root}.stan", user_header=EXTERN, stanc_options={"allow-undefined": True}, **kwargs)
+    compile_stan_file(f"{root}.stan", **kwargs)
 
 
 class StanHf:
@@ -47,7 +44,7 @@ class StanHf:
         """
         @param root Root name for Stan files
         """
-        self.model = CmdStanModel(stan_file=f"{root}.stan", stanc_options={"allow-undefined": True}, exe_file=root)
+        self.model = CmdStanModel(stan_file=f"{root}.stan", exe_file=root)
         self.data = f"{root}_data.json"
 
     def par_names(self):

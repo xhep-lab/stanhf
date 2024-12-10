@@ -221,7 +221,7 @@ class Convert:
                 stan_file.write(self.to_stan())
 
             try:
-                format_stan_file(file_name, overwrite_file=True, backup=False, stanc_options={"allow-undefined": True})
+                format_stan_file(file_name, overwrite_file=True, backup=False)
             except (CalledProcessError, RuntimeError) as err:
                 warnings.warn(f"did not lint --- {str(err)}")
 
