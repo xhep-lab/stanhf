@@ -167,7 +167,7 @@ class ShapeSys(Modifier):
             if self.is_null:
                 return self.default_rel_error_name
             self.this_data[hash_] = self.default_rel_error_name
-    
+
         return self.this_data[hash_]
 
     @property
@@ -230,7 +230,7 @@ class HistoSys(Modifier):
     par_size = 0
     par_init = [0.]
     par_bound = [[-5., 5.]]
-    
+
     this_data = {}
 
     def __init__(self, modifier, sample):
@@ -248,7 +248,7 @@ class HistoSys(Modifier):
             if self.is_null:
                 return self.default_lu_name
             self.this_data[hash_] = self.default_lu_name
-    
+
         return self.this_data[hash_]
 
     @property
@@ -286,7 +286,7 @@ class NormSys(Modifier):
     par_size = 0
     par_init = [0.]
     par_bound = [[-5., 5.]]
-    
+
     this_data = {}
 
     def __init__(self, modifier, sample):
@@ -303,7 +303,7 @@ class NormSys(Modifier):
             if self.is_null:
                 return self.default_lu_name
             self.this_data[hash_] = self.default_lu_name
-    
+
         return self.this_data[hash_]
 
     @property

@@ -15,7 +15,6 @@ from .stanstr import flatten
 from .tracer import METADATA
 
 
-
 def install(progress=True, **kwargs):
     """
     Install Stan if it doesn't exist already
