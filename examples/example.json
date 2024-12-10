@@ -5,7 +5,10 @@
             { "name": "signal",
               "data": [5.0, 10.0],
               "modifiers": [ 
-                { "name": "k_histosys", "type": "histosys", "data": {"hi_data": [20,15], "lo_data": [1, 1]}}
+                { "name": "k_histosys", "type": "histosys", "data": {"hi_data": [20,15], "lo_data": [1, 2]}},
+                { "name": "k_normsys", "type": "normsys", "data": {"hi": 1.1, "lo": 0.9} },
+                { "name": "k_shapesys", "type": "shapesys", "data": [1.0, 1.5] }
+
               ]
             }
           ]
