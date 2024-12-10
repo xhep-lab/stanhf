@@ -165,8 +165,8 @@ class ShapeSys(Modifier):
 
         if hash_ not in self.this_data:
             if self.is_null:
-                return self.default_rel_error
-            self.this_data[hash_] = self.default_rel_error
+                return self.default_rel_error_name
+            self.this_data[hash_] = self.default_rel_error_name
     
         return self.this_data[hash_]
 
