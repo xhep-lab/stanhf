@@ -4,7 +4,6 @@ Running and validating converted models
 """
 
 import json
-import os
 import warnings
 
 import numpy as np

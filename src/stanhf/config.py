@@ -49,6 +49,9 @@ class Measured(Stan):
 
 
 class Parameter(Stan):
+    """
+    Abstract representation of a parameter
+    """
     @property
     @abstractmethod
     def par_fixed(self):
@@ -59,7 +62,7 @@ class Parameter(Stan):
 
 class FreeParameter(Parameter):
     """
-    Declare a parameter
+    Declare a parameter that is sampled
     """
     par_fixed = False
 
