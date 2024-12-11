@@ -21,4 +21,4 @@ def test_target():
     """
     root, par, fixed, null = convert(EXAMPLE)
     build(root)
-    validate(root, RNG)
+    validate(root, par, fixed, null, rng=RNG)
