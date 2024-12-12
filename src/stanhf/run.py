@@ -10,7 +10,7 @@ import numpy as np
 import pyhf
 from cmdstanpy import CmdStanModel, compile_stan_file, install_cmdstan, cmdstan_path
 
-from .stanstr import flatten, pyhf_pars
+from .stanstr import flatten, pyhf_pars, pyhf_order
 from .tracer import METADATA
 
 
@@ -81,7 +81,7 @@ class NativeHf:
         """
         @returns Ordered parameter names
         """
-        return self.model.config.par_names
+        return pyhf_order(self.model.config.par_order, self.model.config.par_names)
 
     def target(self, pars):
         """
@@ -119,8 +119,8 @@ def validate(root, convert_, rng=None):
     if set(stanhf_par) != set(stan_par):
         raise RuntimeError(
             "no agreement in parameter names:\n"
-            f"Stanhf = {stanhf_par} [{len(stanhf_par)}]\n"
-            f" vs. Stan = {stan_par} [{len(stan_par)}]")
+            f"Stanhf[{len(stanhf_par)}] = {stanhf_par}\n"
+            f"Stan[{len(stan_par)}] = {stan_par}")
 
     nhf_par = nhf.par_names()
     stanhf_par = convert_.pyhf_par_names
@@ -128,8 +128,8 @@ def validate(root, convert_, rng=None):
     if set(stanhf_par) != set(nhf_par):
         raise RuntimeError(
             "no agreement in parameter names:\n"
-            f"Stanhf = {stanhf_par} [{len(stanhf_par)}]\n"
-            f" pyhf = {nhf_par} [{len(nhf_par)}]")
+            f"Stanhf[{len(stanhf_par)}] = {stanhf_par}\n"
+            f"pyhf[{len(nhf_par)}] = {nhf_par}")
 
     with open(f"{root}_init.json", encoding="utf-8") as init_file:
         pars = json.load(init_file)
@@ -144,5 +144,8 @@ def validate(root, convert_, rng=None):
 
     if not np.isclose(stanhf_target, nhf_target):
         raise RuntimeError(
-            f"no agreement in target: Stan = {stanhf_target}"
-            f" vs. pyhf = {nhf_target} for pars = {pars}")
+            f"no agreement in target:\n"
+            f"Stan = {stanhf_target}\n"
+            f"pyhf = {nhf_target}\n"
+            f"delta = {stanhf_target - nhf_target}\n"
+            f"for pars = {pars}")
