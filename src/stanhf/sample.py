@@ -24,6 +24,7 @@ class Sample(Stan):
         @param channel Channel of this sample
         """
         self.sample = sample
+        self.channel = channel
 
         self.nominal = sample["data"]
         self.nbins = channel.nbins
