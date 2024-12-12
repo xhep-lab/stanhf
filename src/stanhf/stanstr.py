@@ -5,8 +5,6 @@ Manipulate and parse strings and data
 
 import json
 import warnings
-from collections.abc import Iterable
-
 
 from .tracer import METADATA
 
@@ -46,7 +44,7 @@ def flatten(list_):
     flat = []
 
     for item in list_:
-        if isinstance(item, Iterable):
+        if isinstance(item, list):
             flat += item
         else:
             flat.append(item)
@@ -111,3 +109,39 @@ def read_observed(observed):
             f"observed converted to integer: {int_observed} vs. {observed}")
 
     return int_observed
+
+
+def expand_par_name(name, size):
+    """
+    @returns Expanded names of parameter
+    """
+    if size == 0:
+        return name
+    return [f"{name}[{i}]" for i in range(size)]
+
+
+def pyhf_par_names(pars):
+    """
+    @returns Make names in pyhf style
+    """
+    d = {}
+    for n, s in pars.items():
+        d.setdefault(n, 0)
+        d[n] += s
+
+    return flatten(expand_par_name(n, s) for n, s in d.items())
+
+
+def pyhf_pars(pars):
+    """
+    @returns Make names in pyhf style
+    """
+    d = {}
+    for k, v in pars.items():
+        if isinstance(v, list):
+            for n, e in zip(expand_par_name(k, len(v)), v):
+                d[n] = e
+        else:
+            d[k] = v
+
+    return d
