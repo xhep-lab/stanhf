@@ -18,12 +18,19 @@ class Modifier(Stan):
     """
     Abstract modifier representation
     """
+    this_data = {}
 
     def __init__(self, modifier, sample):
         self.sample = sample
         self.name = join(sample.name, modifier["type"], modifier["name"])
-        self.par_name = modifier["name"]
         self.type = modifier["type"]
+        self.par_name = modifier["name"]
+
+        if self.per_channel:
+            self.this_data.setdefault(self.par_name, self.sample.channel.name)
+            if self.this_data[self.par_name] != self.sample.channel.name:
+                raise RuntimeError(
+                    f"The {self.type} modifier scope is per channel - repeated {self.par_name} across channels")
 
     @property
     @abstractmethod
@@ -57,6 +64,13 @@ class Modifier(Stan):
     def is_null(self):
         """
         @returns Whether modifier has no effect
+        """
+        return False
+
+    @property
+    def per_channel(self):
+        """
+        @returns Whether modifier scope limited to a single
         """
         return False
 
@@ -105,6 +119,7 @@ class StatError(Modifier):
     """
     Scale each bin in a sample by different factor, but constrain those factors by a normal
     """
+    per_channel = True
 
     def __init__(self, modifier, sample):
         super().__init__(modifier, sample)
