@@ -4,23 +4,67 @@
           "samples": [
             { "name": "signal",
               "data": [5.0, 10.0],
-              "modifiers": [ 
-                { "name": "k_histosys", "type": "histosys", "data": {"hi_data": [20,15], "lo_data": [1, 2]}},
+              "modifiers": [
+                { "name": "k_histosys", "type": "histosys", "data": {"hi_data": [20, 15], "lo_data": [1, 2]}},
                 { "name": "k_normsys", "type": "normsys", "data": {"hi": 1.1, "lo": 0.9} },
-                { "name": "k_shapesys", "type": "shapesys", "data": [1.0, 1.5] }
-
+                { "name": "k_shapesys", "type": "shapesys", "data": [1.0, 1.5] },
+                { "name": "k_staterror", "type": "staterror", "data": [0.1, 0.2] },
+                { "name": "lumi", "type": "lumi", "data": null },
+                { "name": "k_normfactor", "type": "normfactor", "data": null },
+                { "name": "k_shapefactor", "type": "shapefactor", "data": null }
+              ]
+            },
+            { "name": "background",
+              "data": [5.0, 10.0],
+              "modifiers": [
+                { "name": "k_histosys", "type": "histosys", "data": {"hi_data": [21, 15], "lo_data": [11, 12]}},
+                { "name": "k_normsys", "type": "normsys", "data": {"hi": 1.1, "lo": 0.9} },
+                { "name": "l_shapesys", "type": "shapesys", "data": [1.0, 1.5] },
+                { "name": "l_staterror", "type": "staterror", "data": [0.1, 0.2] },
+                { "name": "lumi", "type": "lumi", "data": null },
+                { "name": "k_normfactor", "type": "normfactor", "data": null },
+                { "name": "k_shapefactor", "type": "shapefactor", "data": null }
+              ]
+            }
+          ]
+        },
+        { "name": "secondchannel",
+          "samples": [
+            { "name": "signal",
+              "data": [15.0, 13.0],
+              "modifiers": [
+                { "name": "k_histosys", "type": "histosys", "data": {"hi_data": [20, 15], "lo_data": [20, 15]}},
+                { "name": "k_normsys", "type": "normsys", "data": {"hi": 1.1, "lo": 0.9} },
+                { "name": "m_shapesys", "type": "shapesys", "data": [1.0, 1.5] },
+                { "name": "m_staterror", "type": "staterror", "data": [0.1, 0.2] },
+                { "name": "lumi", "type": "lumi", "data": null },
+                { "name": "k_normfactor", "type": "normfactor", "data": null },
+                { "name": "k_shapefactor", "type": "shapefactor", "data": null }
+              ]
+            },
+            { "name": "background",
+              "data": [9.0, 11.0],
+              "modifiers": [ 
+                { "name": "k_histosys", "type": "histosys", "data": {"hi_data": [20, 15], "lo_data": [13, 8]}},
+                { "name": "k_normsys", "type": "normsys", "data": {"hi": 1.1, "lo": 0.9} },
+                { "name": "n_shapesys", "type": "shapesys", "data": [1.0, 1.5] },
+                { "name": "n_staterror", "type": "staterror", "data": [0.1, 0.2] },
+                { "name": "lumi", "type": "lumi", "data": null },
+                { "name": "k_normfactor", "type": "normfactor", "data": null },
+                { "name": "k_shapefactor", "type": "shapefactor", "data": null }
               ]
             }
           ]
         }
     ],
     "observations": [
-        { "name": "singlechannel", "data": [50.0, 60.0] }
+        { "name": "singlechannel", "data": [50.0, 60.0] },
+        { "name": "secondchannel", "data": [50.0, 60.0] }
     ],
     "measurements": [
         { "name": "Measurement", "config":
           {"poi": "k_histosys", "parameters": [ 
-            { "name":"k_histosys", "inits":[1.5], "bounds": [[1, 2]] }
+            { "name":"lumi", "auxdata": [1.0], "sigmas": [0.017], "bounds": [[0.915, 1.085]], "inits": [1.0] }
           ]
           }
         }
