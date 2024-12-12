@@ -39,11 +39,14 @@ def cli(hf_json_file_name, overwrite, build):
     """
     Convert, build and validate HF_JSON_FILE_NAME as a Stan model.
     """
-    root, par, fixed, null = convert(hf_json_file_name, overwrite)
+    root, convert_ = convert(hf_json_file_name, overwrite)
+
+    par, fixed, null = convert_.par_size
+
     print(f"- Stan model files created at {root}*\n"
-          f"- Identified {len(par)} parameters,"
-          f" {len(fixed)} fixed parameters and"
-          f" {len(null)} null parameters")
+          f"- Identified {par} parameters,"
+          f" {fixed} fixed parameters and"
+          f" {null} null parameters")
 
     if not build:
         return
@@ -57,7 +60,7 @@ def cli(hf_json_file_name, overwrite, build):
     stan_build(root)
     print(f"- Stan executable created at {root}")
 
-    validate(root, par, fixed, null)
+    validate(root, convert_)
     print("- Validated parameter names & target")
 
     cmd = f"{root} sample num_chains=4 data file={root}_data.json init={root}_init.json"

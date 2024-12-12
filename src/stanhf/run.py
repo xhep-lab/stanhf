@@ -10,7 +10,7 @@ import numpy as np
 import pyhf
 from cmdstanpy import CmdStanModel, compile_stan_file, install_cmdstan, cmdstan_path
 
-from .stanstr import flatten
+from .stanstr import flatten, pyhf_pars
 from .tracer import METADATA
 
 
@@ -77,26 +77,20 @@ class NativeHf:
         self.model = workspace.model()
         self.data = workspace.data(self.model)
 
-    def fixed_par_names(self):
-        """
-        @returns Names of fixed parameters
-        """
-        fixed = self.model.config.suggested_fixed()
-        return [n for f, n in zip(fixed, self.par_names()) if f]
-
     def par_names(self):
         """
         @returns Ordered parameter names
         """
-        return self.model.config.par_order
+        return self.model.config.par_names
 
     def target(self, pars):
         """
         @returns pyhf target function
         """
         inits = self.model.config.suggested_init()
-        pars = flatten([pars.get(k, inits[i])
-                       for i, k in enumerate(self.par_names())])
+        pars = pyhf_pars(pars)
+        pars = [pars.get(k, inits[i])
+                for i, k in enumerate(self.par_names())]
         return self.model.logpdf(pars, self.data)[0]
 
 
@@ -112,36 +106,30 @@ def perturb(param, scale=0.01, rng=None):
     return pertubed.reshape(np.shape(param)).tolist()
 
 
-def validate(root, par, fixed, null, rng=None):
+def validate(root, convert_, rng=None):
     """
     @param root Root name for model files that will be checked
     """
     stanhf = StanHf(root)
     nhf = NativeHf(root)
 
-    nhf_fixed = nhf.fixed_par_names()
+    stanhf_par = convert_.par_names[0]
+    stan_par = stanhf.par_names()
 
-    if set(fixed) != set(nhf_fixed):
+    if set(stanhf_par) != set(stan_par):
         raise RuntimeError(
-            "no agreement in fixed parameter names: "
-            f"Stan = {fixed} [{len(fixed)}]"
-            f" vs. pyhf = {nhf_fixed} [{len(nhf_fixed)}]")
-
-    stanhf_par = stanhf.par_names()
-
-    if set(stanhf_par) != set(par):
-        raise RuntimeError(
-            "no agreement in parameter names: "
-            f"Stan = {stanhf_par} [{len(stanhf_par)}]"
-            f" vs. expected = {par} [{len(par)}]")
+            "no agreement in parameter names:\n"
+            f"Stanhf = {stanhf_par} [{len(stanhf_par)}]\n"
+            f" vs. Stan = {stan_par} [{len(stan_par)}]")
 
     nhf_par = nhf.par_names()
+    stanhf_par = convert_.pyhf_par_names
 
-    if set(par + fixed + null) != set(nhf_par):
+    if set(stanhf_par) != set(nhf_par):
         raise RuntimeError(
-            "no agreement in parameter names: "
-            f"Stan = {stanhf_par} [{len(stanhf_par)}]"
-            f" vs. pyhf = {nhf_par} [{len(nhf_par)}]")
+            "no agreement in parameter names:\n"
+            f"Stanhf = {stanhf_par} [{len(stanhf_par)}]\n"
+            f" pyhf = {nhf_par} [{len(nhf_par)}]")
 
     with open(f"{root}_init.json", encoding="utf-8") as init_file:
         pars = json.load(init_file)

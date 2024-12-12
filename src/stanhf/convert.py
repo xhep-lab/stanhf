@@ -15,7 +15,7 @@ from cmdstanpy import format_stan_file, write_stan_json
 from .channel import Channel
 from .config import find_measureds, find_params
 from .modifier import find_constraint, find_staterror
-from .stanstr import block, merge, flatten, jlint, read_observed
+from .stanstr import block, merge, flatten, jlint, read_observed, pyhf_par_names
 
 
 VERSION = importlib.metadata.version(__package__)
@@ -122,6 +122,13 @@ class Convert:
         return [m for m in self._modifiers if not m.is_null]
 
     @cached_property
+    def pyhf_par_names(self):
+        """
+        @returns All parameter names in pyhf style
+        """
+        return pyhf_par_names({m.par_name: m.par_size for m in self._modifiers})
+
+    @cached_property
     def par_names(self):
         """
         @returns Names of parameters, fixed parameters and null parameters
@@ -129,6 +136,16 @@ class Convert:
         par = [p.par_name for p in self._pars if not p.par_fixed]
         fixed = [p.par_name for p in self._pars if p.par_fixed]
         null = [m.par_name for m in self._modifiers if m.is_null]
+        return par, fixed, null
+
+    @cached_property
+    def par_size(self):
+        """
+        @returns Number of parameters, fixed parameters and null parameters
+        """
+        par = sum(p.par_size for p in self._pars if not p.par_fixed)
+        fixed = sum(p.par_size for p in self._pars if p.par_fixed)
+        null = sum(m.par_size for m in self._modifiers if m.is_null)
         return par, fixed, null
 
     @cached_property
@@ -254,4 +271,4 @@ def convert(hf_json_file, overwrite=True):
     convert_.write_stan_data_file(f"{root}_data.json", overwrite)
     convert_.write_stan_init_file(f"{root}_init.json", overwrite)
 
-    return root, *convert_.par_names
+    return root, convert_
