@@ -19,6 +19,6 @@ def test_target():
     """
     Validate output from Stan against pyhf
     """
-    root, par, fixed, null = convert(EXAMPLE)
+    root, convert_ = convert(EXAMPLE)
     build(root)
-    validate(root, par, fixed, null, rng=RNG)
+    validate(root, convert_, rng=RNG)

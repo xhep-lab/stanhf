@@ -1,5 +1,15 @@
 parameters{
-real<lower=lu_k_histosys.1, upper=lu_k_histosys.2> k_histosys; // from FreeParameter.stan_pars [config.py:L82]
-real<lower=lu_k_normsys.1, upper=lu_k_normsys.2> k_normsys; // from FreeParameter.stan_pars [config.py:L82]
-vector<lower=lu_k_shapesys.1, upper=lu_k_shapesys.2>[2] k_shapesys; // from FreeParameter.stan_pars [config.py:L82]
+real<lower=lu_k_histosys.1, upper=lu_k_histosys.2> k_histosys; // from FreeParameter.stan_pars [config.py:L68]
+real<lower=lu_k_normsys.1, upper=lu_k_normsys.2> k_normsys; // from FreeParameter.stan_pars [config.py:L68]
+vector<lower=lu_k_shapesys.1, upper=lu_k_shapesys.2>[2] k_shapesys; // from FreeParameter.stan_pars [config.py:L68]
+vector<lower=lu_k_staterror.1, upper=lu_k_staterror.2>[2] k_staterror; // from FreeParameter.stan_pars [config.py:L68]
+real<lower=lu_lumi.1, upper=lu_lumi.2> lumi; // from FreeParameter.stan_pars [config.py:L68]
+real<lower=lu_k_normfactor.1, upper=lu_k_normfactor.2> k_normfactor; // from FreeParameter.stan_pars [config.py:L68]
+vector<lower=lu_k_shapefactor.1, upper=lu_k_shapefactor.2>[2] k_shapefactor; // from FreeParameter.stan_pars [config.py:L68]
+vector<lower=lu_l_shapesys.1, upper=lu_l_shapesys.2>[2] l_shapesys; // from FreeParameter.stan_pars [config.py:L68]
+vector<lower=lu_l_staterror.1, upper=lu_l_staterror.2>[2] l_staterror; // from FreeParameter.stan_pars [config.py:L68]
+vector<lower=lu_m_shapesys.1, upper=lu_m_shapesys.2>[2] m_shapesys; // from FreeParameter.stan_pars [config.py:L68]
+vector<lower=lu_m_staterror.1, upper=lu_m_staterror.2>[2] m_staterror; // from FreeParameter.stan_pars [config.py:L68]
+vector<lower=lu_n_shapesys.1, upper=lu_n_shapesys.2>[2] n_shapesys; // from FreeParameter.stan_pars [config.py:L68]
+vector<lower=lu_n_staterror.1, upper=lu_n_staterror.2>[2] n_staterror; // from FreeParameter.stan_pars [config.py:L68]
 }
