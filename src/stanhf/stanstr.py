@@ -145,3 +145,11 @@ def pyhf_pars(pars):
             d[k] = v
 
     return d
+
+
+def pyhf_order(order, pars):
+    """
+    @returns Make names in pyhf order
+    """
+    stripped = [p.split("[", 1)[0] for p in pars if "[" in p]
+    return flatten(expand_par_name(o, stripped.count(o)) for o in order)
