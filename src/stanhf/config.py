@@ -136,7 +136,7 @@ class FixedParameter(Parameter):
         """
         if self.par_size == 0:
             return f"real {self.par_name};"
-        return f"vector[{self.par_size}] {self.par_name}"
+        return f"vector[{self.par_size}] {self.par_name};"
 
     @trace
     def stan_data_card(self):
