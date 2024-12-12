@@ -143,9 +143,9 @@ class Convert:
         """
         @returns Number of parameters, fixed parameters and null parameters
         """
-        par = sum(p.par_size for p in self._pars if not p.par_fixed)
-        fixed = sum(p.par_size for p in self._pars if p.par_fixed)
-        null = sum(m.par_size for m in self._modifiers if m.is_null)
+        par = sum(max(p.par_size, 1) for p in self._pars if not p.par_fixed)
+        fixed = sum(max(p.par_size, 1) for p in self._pars if p.par_fixed)
+        null = sum(max(m.par_size, 1) for m in self._modifiers if m.is_null)
         return par, fixed, null
 
     @cached_property
