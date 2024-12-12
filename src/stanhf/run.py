@@ -10,7 +10,7 @@ import numpy as np
 import pyhf
 from cmdstanpy import CmdStanModel, compile_stan_file, install_cmdstan, cmdstan_path
 
-from .stanstr import flatten, pyhf_pars, pyhf_order
+from .stanstr import pyhf_pars, pyhf_order
 from .tracer import METADATA
 
 

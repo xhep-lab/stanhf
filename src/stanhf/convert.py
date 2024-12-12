@@ -13,7 +13,7 @@ from functools import cached_property
 from cmdstanpy import format_stan_file, write_stan_json
 
 from .channel import Channel
-from .config import find_measureds, find_params
+from .config import find_measureds, find_params, FreeParameter, FixedParameter, NullParameter
 from .modifier import find_constraint, find_staterror
 from .stanstr import block, merge, flatten, jlint, read_observed, pyhf_par_names
 
@@ -84,21 +84,21 @@ class Convert:
         """
         @returns Measurements for Stan program
         """
-        return find_measureds(self._config, self._non_null_modifiers)
+        return find_measureds(self._config, self._modifiers)
 
     @cached_property
     def _pars(self):
         """
         @returns Parameters for Stan program
         """
-        return find_params(self._config, self._non_null_modifiers)
+        return find_params(self._config, self._modifiers)
 
     @cached_property
     def _constraints(self):
         """
         @returns Constraints for Stan program
         """
-        return [find_constraint(self._non_null_modifiers)]
+        return [find_constraint(self._modifiers)]
 
     @cached_property
     def _staterror(self):
@@ -126,27 +126,31 @@ class Convert:
         """
         @returns All parameter names in pyhf style
         """
-        return pyhf_par_names({m.par_name: m.par_size for m in self._modifiers})
+        return pyhf_par_names({m.par_name: m.par_size for m in self._pars})
+
+    @cached_property
+    def filter_pars(self):
+        """
+        @returns Names of parameters, fixed parameters and null parameters
+        """
+        par = [p for p in self._pars if isinstance(p, FreeParameter)]
+        fixed = [p for p in self._pars if isinstance(p, FixedParameter)]
+        null = [p for p in self._pars if isinstance(p, NullParameter)]
+        return par, fixed, null
 
     @cached_property
     def par_names(self):
         """
         @returns Names of parameters, fixed parameters and null parameters
         """
-        par = [p.par_name for p in self._pars if not p.par_fixed]
-        fixed = [p.par_name for p in self._pars if p.par_fixed]
-        null = [m.par_name for m in self._modifiers if m.is_null]
-        return par, fixed, null
+        return [[p.par_name for p in pars] for pars in self.filter_pars]
 
     @cached_property
     def par_size(self):
         """
         @returns Number of parameters, fixed parameters and null parameters
         """
-        par = sum(max(p.par_size, 1) for p in self._pars if not p.par_fixed)
-        fixed = sum(max(p.par_size, 1) for p in self._pars if p.par_fixed)
-        null = sum(max(m.par_size, 1) for m in self._modifiers if m.is_null)
-        return par, fixed, null
+        return [sum(max(p.par_size, 1) for p in pars) for pars in self.filter_pars]
 
     @cached_property
     def _data(self):

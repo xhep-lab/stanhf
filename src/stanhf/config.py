@@ -5,11 +5,10 @@ Parse configuaration from a hf model
 Including measurements, initial choices of parameters and bounds.
 """
 
-from abc import abstractmethod
-
 from .stanabc import Stan
 from .stanstr import join, add_to_target, read_par_bound, read_par_init
 from .tracer import trace
+from .modifier import CONSTRAINED
 
 
 class Measured(Stan):
@@ -48,23 +47,10 @@ class Measured(Stan):
         return {self.normal_data_name: self.normal_data}
 
 
-class Parameter(Stan):
-    """
-    Abstract representation of a parameter
-    """
-    @property
-    @abstractmethod
-    def par_fixed(self):
-        """
-        @returns Whether parameter was fixed
-        """
-
-
-class FreeParameter(Parameter):
+class FreeParameter(Stan):
     """
     Declare a parameter that is sampled
     """
-    par_fixed = False
 
     def __init__(self, config, modifier):
         """
@@ -113,11 +99,10 @@ class FreeParameter(Parameter):
         return {self.par_bound_name: self.par_bound}
 
 
-class FixedParameter(Parameter):
+class FixedParameter(Stan):
     """
     Declare a fixed parameter
     """
-    par_fixed = True
 
     def __init__(self, config, modifier):
         """
@@ -146,33 +131,66 @@ class FixedParameter(Parameter):
         return {self.par_name: self.par_init}
 
 
-def is_measured(config, par_names):
+class NullParameter(Stan):
+    """
+    A null parameter
+    """
+
+    def __init__(self, modifier):
+        """
+        @param config hf configuration for this parameter
+        @param modifier Modifier object for this parameter
+        """
+        self.par_name = modifier.par_name
+        self.par_size = modifier.par_size
+
+
+def is_measured(config, modifier):
     """
     @returns Whether configuration indicates a measurement
     """
-    return {"auxdata", "sigmas"} <= config.keys() and config["name"] in par_names
+    return {"auxdata", "sigmas"} <= config.get(modifier.par_name, {}).keys()
+
+
+def is_fixed(config, modifier):
+    """
+    @returns Whether modifier corresponds to fixed parameter
+    """
+    config_fixed = config.get(modifier.par_name, {}).get("fixed")
+    measured_null = modifier.is_null and is_measured(config, modifier)
+    constrained_null = modifier.is_null and modifier.type in CONSTRAINED
+    return config_fixed or measured_null or constrained_null
+
+
+def is_free(config, modifier):
+    """
+    @returns Whether modifier corresponds to free parameter
+    """
+    return not modifier.is_null and not is_fixed(config, modifier)
 
 
 def find_measureds(config, modifiers):
     """
     @returns Measured modifiers
     """
-    par_names = {m.par_name for m in modifiers}
-    return [Measured(d) for d in config.values() if is_measured(d, par_names)]
-
-
-def find_param(config, modifier):
-    """
-    @returns Parameter or fixed parameter
-    """
-    if config.get("fixed"):
-        return FixedParameter(config, modifier)
-    return FreeParameter(config, modifier)
+    unique = {m.par_name: m for m in modifiers}.values()
+    return [Measured(config.get(m.par_name, {})) for m in unique if is_measured(config, m)]
 
 
 def find_params(config, modifiers):
     """
     @returns Parameters from data in configuation and hf model
     """
-    unique = {m.par_name: m for m in modifiers}
-    return [find_param(config.get(k, {}), v) for k, v in unique.items()]
+    free = {m.par_name: m for m in modifiers if is_free(config, m)}
+    free_params = [FreeParameter(config.get(k, {}), v)
+                   for k, v in free.items()]
+
+    fixed = {m.par_name: m for m in modifiers if is_fixed(
+        config, m) and m.par_name not in free}
+    fixed_params = [FixedParameter(config.get(k, {}), v)
+                    for k, v in fixed.items()]
+
+    null = {m.par_name: m for m in modifiers if m.par_name not in free and m.par_name not in fixed}
+    null_params = [NullParameter(v) for v in null.values()]
+
+    return free_params + fixed_params + null_params

@@ -14,6 +14,9 @@ from .stanstr import join, add_to_target, hashed
 from .tracer import trace
 
 
+CONSTRAINED = ["histosys", "normsys"]
+
+
 class Modifier(Stan):
     """
     Abstract modifier representation
@@ -415,9 +418,7 @@ def find_constraint(modifiers):
     """
     @returns Find constraints that are applied once to modifiers
     """
-    par_name = {
-        m.par_name for m in modifiers if m.type in [
-            "histosys", "normsys"]}
+    par_name = {m.par_name for m in modifiers if m.type in CONSTRAINED}
     if not par_name:
         return None
     return StandardNormal(par_name)
