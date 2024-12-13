@@ -42,7 +42,7 @@ def cli(hf_json_file_name, overwrite, build, validate):
     Convert, build and validate HF_JSON_FILE_NAME as a Stan model.
     """
     root, convert_ = convert(hf_json_file_name, overwrite)
-
+    click.echo(f"- Stan model files created at {root}*")
     click.echo(convert_)
 
     if build:
