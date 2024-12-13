@@ -43,28 +43,23 @@ def cli(hf_json_file_name, overwrite, build, validate):
     """
     root, convert_ = convert(hf_json_file_name, overwrite)
 
-    par, fixed, null = convert_.par_size
-
-    print(f"- Stan model files created at {root}*\n"
-          f"- Identified {par} parameters,"
-          f" {fixed} fixed parameters and"
-          f" {null} null parameters")
+    click.echo(convert_)
 
     if build:
 
         stan_path = install()
-        print(f"- Stan installed at {stan_path}")
+        click.echo(f"- Stan installed at {stan_path}")
 
         local = os.path.join(stan_path, "build", "local")
-        print(f"- Build settings controlled at {local}")
+        click.echo(f"- Build settings controlled at {local}")
 
         stan_build(root)
-        print(f"- Stan executable created at {root}")
+        click.echo(f"- Stan executable created at {root}")
 
         cmd = f"{root} sample num_chains=4 data file={root}_data.json init={root}_init.json"
-        print(f"- Try e.g., {cmd}")
+        click.echo(f"- Try e.g., {cmd}")
 
     if validate:
 
         stan_validate(root, convert_)
-        print("- Validated parameter names & target")
+        click.echo("- Validated parameter names & target")

@@ -153,6 +153,28 @@ class Convert:
         return [sum(max(p.par_size, 1) for p in pars) for pars in self.filter_pars]
 
     @cached_property
+    def model_size(self):
+        """
+        @returns Number of channels, samples, and modifiers
+        """
+        channels = len(self._channels)
+        samples = len(self._samples)
+        non_null_modifiers = len(self._non_null_modifiers)
+        null_modifiers = len(self._modifiers) - non_null_modifiers
+        return channels, samples, non_null_modifiers, null_modifiers
+
+    def __str__(self):
+        """
+        @returns Summary of model
+        """
+        par, fixed, null = self.par_size
+        channels, samples, non_null_modifiers, null_modifiers = self.model_size
+        return (f"- pyhf file '{self.hf_json_file_name}'\n"
+                f"{par} free parameters, {fixed} fixed parameters and {null} parameters\n"
+                f"{channels} channels with {samples} samples\n"
+                f"{non_null_modifiers} modifiers and {null_modifiers} ignored null modifiers")
+
+    @cached_property
     def _data(self):
         """
         @returns Representation of all elements in Stan program
