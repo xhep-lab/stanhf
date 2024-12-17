@@ -29,7 +29,7 @@ for details. Try e.g.,
 
 This converts, compiles and validates the example model. The compiled model is a cmdstan executable. You can run the usual Stan algorithms (HMC, optimization etc) through this executable. See [EXAMPLE.md](EXAMPLE.md) for a walkthrough.
 
-## Differences with resepect to pyhf
+## Differences with respect to pyhf
 
 The only deliberate deviations from pyhf are the stricter interpretation of two edges cases:
 
