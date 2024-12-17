@@ -134,7 +134,7 @@ def pyhf_par_names(pars):
 
 def pyhf_pars(pars):
     """
-    @returns Make names in pyhf style
+    @returns Make parameter values dictionary with keys in pyhf style
     """
     d = {}
     for k, v in pars.items():
@@ -149,7 +149,7 @@ def pyhf_pars(pars):
 
 def pyhf_order(order, pars):
     """
-    @returns Make names in pyhf order
+    @returns Expanded parameter names in pyhf order
     """
     stripped = [p.split("[", 1)[0] for p in pars if "[" in p]
     return flatten(expand_par_name(o, stripped.count(o)) for o in order)

@@ -33,7 +33,8 @@ class Modifier(Stan):
             self.this_data.setdefault(self.par_name, self.sample.channel.name)
             if self.this_data[self.par_name] != self.sample.channel.name:
                 raise RuntimeError(
-                    f"The {self.type} modifier scope is per channel - repeated {self.par_name} across channels")
+                    f"The {self.type} modifier scope is per channel - "
+                    f"repeated {self.par_name} across channels")
 
     @property
     @abstractmethod
@@ -179,6 +180,9 @@ class ShapeSys(Modifier):
 
     @cached_property
     def rel_error_name(self):
+        """
+        @returns Name of relative error data - reuse existing data if possible
+        """
         hash_ = hashed(self.rel_error)
 
         if hash_ not in self.this_data:
@@ -228,16 +232,18 @@ class ShapeSys(Modifier):
         """
         @returns Declare data for relative error in auxiliary measurement
         """
-        if self.default_rel_error_name == self.rel_error_name:
-            return f"vector[{self.par_size}] {self.rel_error_name};"
+        if self.default_rel_error_name != self.rel_error_name:
+            return None
+        return f"vector[{self.par_size}] {self.rel_error_name};"
 
     @trace
     def stan_data_card(self):
         """
         @returns Set data for standard deviation of normal
         """
-        if self.default_rel_error_name == self.rel_error_name:
-            return {self.rel_error_name: self.rel_error}
+        if self.default_rel_error_name != self.rel_error_name:
+            return None
+        return {self.rel_error_name: self.rel_error}
 
 
 class HistoSys(Modifier):
@@ -260,6 +266,9 @@ class HistoSys(Modifier):
 
     @cached_property
     def lu_name(self):
+        """
+        @returns Name of lower/upper data - reuse existing data if possible
+        """
         hash_ = hashed(self.lu_data)
 
         if hash_ not in self.this_data:
@@ -278,16 +287,18 @@ class HistoSys(Modifier):
         """
         @returns Declare one-sigma lower and upper values for additive corrections
         """
-        if self.lu_name == self.default_lu_name:
-            return f"tuple(vector[{self.sample.nbins}], vector[{self.sample.nbins}]) {self.lu_name};"
+        if self.lu_name != self.default_lu_name:
+            return None
+        return f"tuple(vector[{self.sample.nbins}], vector[{self.sample.nbins}]) {self.lu_name};"
 
     @trace
     def stan_data_card(self):
         """
         @returns Set data for one-sigma lower and upper values for additive corrections
         """
-        if self.lu_name == self.default_lu_name:
-            return {self.lu_name: self.lu_data}
+        if self.lu_name != self.default_lu_name:
+            return None
+        return {self.lu_name: self.lu_data}
 
     @trace
     def stan_trans_pars(self):
@@ -315,6 +326,9 @@ class NormSys(Modifier):
 
     @cached_property
     def lu_name(self):
+        """
+        @returns Name of lower/upper data - reuse existing data if possible
+        """
         hash_ = hashed(self.lu_data)
 
         if hash_ not in self.this_data:
@@ -333,16 +347,18 @@ class NormSys(Modifier):
         """
         @returns Declare one-sigma lower and upper values for mulitplicative corrections
         """
-        if self.lu_name == self.default_lu_name:
-            return f"tuple(real, real) {self.lu_name};"
+        if self.lu_name != self.default_lu_name:
+            return None
+        return f"tuple(real, real) {self.lu_name};"
 
     @trace
     def stan_data_card(self):
         """
         @returns Set data for one-sigma lower and upper values for mulitplicative corrections
         """
-        if self.lu_name == self.default_lu_name:
-            return {self.lu_name: self.lu_data}
+        if self.lu_name != self.default_lu_name:
+            return None
+        return {self.lu_name: self.lu_data}
 
     @trace
     def stan_trans_pars(self):
