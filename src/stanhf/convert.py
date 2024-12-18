@@ -15,7 +15,8 @@ from cmdstanpy import format_stan_file, write_stan_json
 from .channel import Channel
 from .config import find_measureds, find_params, FreeParameter, FixedParameter, NullParameter
 from .modifier import find_constraint, find_staterror
-from .stanstr import block, merge, flatten, jlint, read_observed, pyhf_par_names
+from .stanstr import block, flatten, jlint, read_observed, pyhf_par_names
+from .tracer import mergetraced
 
 
 VERSION = importlib.metadata.version(__package__)
@@ -233,13 +234,13 @@ class Convert:
         """
         @returns Data for Stan program
         """
-        return merge(e.stan_data_card() for e in self._data)
+        return mergetraced(e.stan_data_card() for e in self._data)
 
     def init_card(self):
         """
         @returns Initial parameter values for Stan program
         """
-        return merge(e.stan_init_card() for e in self._data)
+        return mergetraced(e.stan_init_card() for e in self._data)
 
     def to_stan(self):
         """
