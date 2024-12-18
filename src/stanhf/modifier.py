@@ -345,7 +345,7 @@ class NormSys(Modifier):
     @trace
     def stan_data(self):
         """
-        @returns Declare one-sigma lower and upper values for mulitplicative corrections
+        @returns Declare one-sigma lower and upper values for multiplicative corrections
         """
         if self.lu_name != self.default_lu_name:
             return None
@@ -354,7 +354,7 @@ class NormSys(Modifier):
     @trace
     def stan_data_card(self):
         """
-        @returns Set data for one-sigma lower and upper values for mulitplicative corrections
+        @returns Set data for one-sigma lower and upper values for multiplicative corrections
         """
         if self.lu_name != self.default_lu_name:
             return None
@@ -410,7 +410,7 @@ class CombinedStatError(Stan):
         """
         nominal = " + ".join(m.sample.nominal_name for m in self.modifiers)
         var = " + ".join(f"{m.stdev_name}.^2" for m in self.modifiers)
-        return f"vector[{self.channel.nbins}] {self.stdev_name} = ({var}).^0.5 ./ ({nominal});"
+        return f"vector[{self.channel.nbins}] {self.stdev_name} = sqrt({var}) ./ ({nominal});"
 
     @trace
     def stan_model(self):
