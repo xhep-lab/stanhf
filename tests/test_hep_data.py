@@ -47,7 +47,8 @@ def runner(doi):
     folder_name = doi.replace("/", "_").replace(".", "_")
     pyhf.contrib.utils.download(f"https://doi.org/{doi}", folder_name)
     for json_file in glob.glob(f"{folder_name}/*.json"):
-        convert(f"{folder_name}/{json_file}")
+        if "patch" not in json_file:
+            convert(json_file)
 
 
 def test_convert():
