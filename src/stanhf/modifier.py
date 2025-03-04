@@ -16,20 +16,6 @@ from .tracer import trace
 CONSTRAINED = ["histosys", "normsys"]
 
 
-def check_per_channel(modifiers):
-    """
-    Check that per channel modifiers are not repeated across channels
-    """
-    per_channel_modifiers = [m for m in modifiers if m.per_channel]
-    channels = {m.par_name: m.sample.channel.name for m in per_channel_modifiers}
-
-    for m in per_channel_modifiers:
-        if m.sample.channel.name != channels[m.par_name]:
-            raise RuntimeError(
-                f"The {m.type} modifier scope is per channel - "
-                f"repeated {m.par_name} across channels")
-
-
 class Modifier(Stan):
     """
     Abstract modifier representation
@@ -413,3 +399,17 @@ def order_modifiers(modifiers):
     add = [m for m in modifiers if m.additive]
     other = [m for m in modifiers if not m.additive]
     return add + other
+
+
+def check_per_channel(modifiers):
+    """
+    Check that per channel modifiers are not repeated across channels
+    """
+    per_channel_modifiers = [m for m in modifiers if m.per_channel]
+    channels = {m.par_name: m.sample.channel.name for m in per_channel_modifiers}
+
+    for m in per_channel_modifiers:
+        if m.sample.channel.name != channels[m.par_name]:
+            raise RuntimeError(
+                f"The {m.type} modifier scope is per channel - "
+                f"repeated {m.par_name} across channels")
