@@ -29,19 +29,17 @@ def print_cmdstan_path(ctx, _, value):
 @click.command()
 @click.argument('hf_json_file_name', type=click.Path(exists=True))
 @click.version_option(VERSION, message="%(version)s")
-@click.option('--overwrite/--no-overwrite', default=True,
-              help="Overwrite existing files.")
 @click.option('--build/--no-build', default=True,
               help="Build Stan program.")
 @click.option('--validate/--no-validate', default=True,
               help="Validate Stan program.")
 @click.option('--cmdstan-path', is_flag=True, callback=print_cmdstan_path,
               expose_value=False, is_eager=True)
-def cli(hf_json_file_name, overwrite, build, validate):
+def cli(hf_json_file_name, build, validate):
     """
     Convert, build and validate HF_JSON_FILE_NAME as a Stan model.
     """
-    root, convert_ = convert(hf_json_file_name, overwrite)
+    root, convert_ = convert(hf_json_file_name)
     click.echo(f"- Stan model files created at {root}*")
     click.echo(convert_)
 

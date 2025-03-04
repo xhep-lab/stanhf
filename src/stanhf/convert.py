@@ -24,6 +24,15 @@ CWD = os.path.dirname(os.path.realpath(__file__))
 STAN_FUNCTIONS = os.path.join(CWD, "stanhf.stanfunctions")
 
 
+def is_newer(a, b):
+    """
+    @returns Whether file a newer than file b
+    """
+    if not os.path.isfile(b):
+        return True
+    return os.path.getmtime(a) > os.path.getmtime(b)
+
+
 class Convert:
     """
     Convert histfactory into Stan code
@@ -260,7 +269,8 @@ class Convert:
         """
         Write Stan program to a file
         """
-        if overwrite or not os.path.isfile(file_name):
+        if is_newer(self.hf_json_file_name, file_name):
+
             with open(file_name, "w", encoding="utf-8") as stan_file:
                 stan_file.write(self.to_stan())
 
@@ -269,24 +279,24 @@ class Convert:
             except (CalledProcessError, RuntimeError) as err:
                 warnings.warn(f"did not lint --- {str(err)}")
 
-    def write_stan_data_file(self, file_name, overwrite=True):
+    def write_stan_data_file(self, file_name):
         """
         Write Stan data to a file
         """
-        if overwrite or not os.path.isfile(file_name):
+        if is_newer(self.hf_json_file_name, file_name):
             write_stan_json(file_name, self.data_card())
             jlint(file_name)
 
-    def write_stan_init_file(self, file_name, overwrite=True):
+    def write_stan_init_file(self, file_name):
         """
         Write Stan initial values to a file
         """
-        if overwrite or not os.path.isfile(file_name):
+        if is_newer(self.hf_json_file_name, file_name):
             write_stan_json(file_name, self.init_card())
             jlint(file_name)
 
 
-def convert(hf_json_file, overwrite=True):
+def convert(hf_json_file):
     """
     @param hf_json_file Name of hf file
     @returns Root name of output files
@@ -294,8 +304,8 @@ def convert(hf_json_file, overwrite=True):
     root = os.path.splitext(hf_json_file)[0]
 
     convert_ = Convert(hf_json_file)
-    convert_.write_stan_file(f"{root}.stan", overwrite)
-    convert_.write_stan_data_file(f"{root}_data.json", overwrite)
-    convert_.write_stan_init_file(f"{root}_init.json", overwrite)
+    convert_.write_stan_file(f"{root}.stan")
+    convert_.write_stan_data_file(f"{root}_data.json")
+    convert_.write_stan_init_file(f"{root}_init.json")
 
     return root, convert_
