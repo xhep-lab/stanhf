@@ -5,12 +5,11 @@ Parse a modifier from a hf model
 
 import warnings
 from abc import abstractmethod
-from functools import cached_property
 
 import numpy as np
 
 from .stanabc import Stan
-from .stanstr import join, add_to_target, hashed
+from .stanstr import join, add_to_target
 from .tracer import trace
 
 

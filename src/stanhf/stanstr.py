@@ -50,13 +50,6 @@ def flatten(list_):
     return flat
 
 
-def hashed(list_):
-    """
-    @returns Hash of nested lists
-    """
-    return hash(repr(list_))
-
-
 def jlint(file_name):
     """
     @param file_name JSON file to be linted by indenting and sorting keys
