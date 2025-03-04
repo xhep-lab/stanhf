@@ -14,7 +14,7 @@ from cmdstanpy import format_stan_file, write_stan_json
 
 from .channel import Channel
 from .config import find_measureds, find_params, FreeParameter, FixedParameter, NullParameter
-from .modifier import find_constraint, find_staterror
+from .modifier import find_constraint, find_staterror, check_per_channel
 from .stanstr import block, flatten, jlint, read_observed, pyhf_par_names
 from .tracer import mergetraced
 
@@ -122,7 +122,9 @@ class Convert:
         """
         @returns Modifiers in hf
         """
-        return flatten(c.modifiers for c in self._channels)
+        modifiers = flatten(c.modifiers for c in self._channels)
+        check_per_channel(modifiers)
+        return modifiers
 
     @cached_property
     def _non_null_modifiers(self):
@@ -180,7 +182,7 @@ class Convert:
         par, fixed, null = self.par_size
         channels, samples, non_null_modifiers, null_modifiers = self.model_size
         return (f"- pyhf file '{self.hf_json_file_name}'\n"
-                f"{par} free parameters, {fixed} fixed parameters and {null} parameters\n"
+                f"{par} free parameters, {fixed} fixed parameters and {null} ignored null parameters\n"
                 f"{channels} channels with {samples} samples\n"
                 f"{non_null_modifiers} modifiers and {null_modifiers} ignored null modifiers")
 
@@ -265,7 +267,7 @@ class Convert:
                   self.generated_quantities_block()]
         return "\n\n".join([b for b in blocks if b is not None])
 
-    def write_stan_file(self, file_name, overwrite=True):
+    def write_stan_file(self, file_name):
         """
         Write Stan program to a file
         """
@@ -278,6 +280,9 @@ class Convert:
                 format_stan_file(file_name, overwrite_file=True, backup=False)
             except (CalledProcessError, RuntimeError) as err:
                 warnings.warn(f"did not lint --- {str(err)}")
+        else:
+            warnings.warn(
+                f"not overwriting {file_name} as newer than {self.hf_json_file_name}")
 
     def write_stan_data_file(self, file_name):
         """
@@ -286,6 +291,9 @@ class Convert:
         if is_newer(self.hf_json_file_name, file_name):
             write_stan_json(file_name, self.data_card())
             jlint(file_name)
+        else:
+            warnings.warn(
+                f"not overwriting {file_name} as newer than {self.hf_json_file_name}")
 
     def write_stan_init_file(self, file_name):
         """
@@ -294,6 +302,9 @@ class Convert:
         if is_newer(self.hf_json_file_name, file_name):
             write_stan_json(file_name, self.init_card())
             jlint(file_name)
+        else:
+            warnings.warn(
+                f"not overwriting {file_name} as newer than {self.hf_json_file_name}")
 
 
 def convert(hf_json_file):
