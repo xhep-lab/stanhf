@@ -74,7 +74,7 @@ class NativeHf:
             spec = json.load(hf_file)
 
         workspace = pyhf.Workspace(spec)
-        self.model = workspace.model()
+        self.model = workspace.model(poi_name=None)
         self.data = workspace.data(self.model)
 
     def par_names(self):
@@ -110,8 +110,8 @@ def validate(root, convert_, rng=None):
     """
     @param root Root name for model files that will be checked
     """
-    stanhf = StanHf(root)
     nhf = NativeHf(root)
+    stanhf = StanHf(root)
 
     stanhf_par = convert_.par_names[0]
     stan_par = stanhf.par_names()
