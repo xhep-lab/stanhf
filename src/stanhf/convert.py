@@ -30,11 +30,11 @@ STAN_FUNCTIONS = os.path.join(CWD, "stanhf.stanfunctions")
 
 def is_newer(a, b):
     """
-    @returns Whether file a newer than file b
+    @returns Whether file a or code is newer than file b
     """
     if not os.path.isfile(b):
         return True
-    return os.path.getmtime(a) > os.path.getmtime(b)
+    return  max(os.path.getmtime(__file__), os.path.getmtime(a)) > os.path.getmtime(b)
 
 
 class Convert:

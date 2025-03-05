@@ -181,4 +181,5 @@ def find_params(config, modifiers):
     """
     @returns Parameters from data in configuation and hf model
     """
-    return [find_param(config, m) for m in modifiers]
+    unique = {m.par_name: m for m in modifiers}.values()
+    return [find_param(config, m) for m in unique]
