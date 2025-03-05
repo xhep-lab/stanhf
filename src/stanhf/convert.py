@@ -60,9 +60,9 @@ class Convert:
         if self.patch is None:
             return workspace
 
-        patch_json_file_name, patch_number = self.patch
+        patch_file_name, patch_number = self.patch
 
-        with open(patch_json_file_name, encoding="utf-8") as patch_file:
+        with open(patch_file_name, encoding="utf-8") as patch_file:
             patch_set = pyhf.PatchSet(json.load(patch_file))
 
         patch = patch_set.patches[patch_number]
@@ -78,9 +78,9 @@ class Convert:
         if self.patch is None:
             return root
 
-        patch_json_file_name, patch_number = self.patch
+        patch_file_name, patch_number = self.patch
         patch_root = os.path.splitext(
-            os.path.split(patch_json_file_name)[1])[0]
+            os.path.split(patch_file_name)[1])[0]
         return f"{root}_{patch_root}_{patch_number}"
 
     def _metadata(self):
