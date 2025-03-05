@@ -10,13 +10,17 @@ import warnings
 from subprocess import CalledProcessError
 from functools import cached_property
 
-from cmdstanpy import format_stan_file, write_stan_json
+import numpy as np
+import pyhf
+from cmdstanpy import format_stan_file, write_stan_json, compile_stan_file
 
 from .channel import Channel
 from .config import find_measureds, find_params, FreeParameter, FixedParameter, NullParameter
 from .modifier import find_constraint, find_staterror, check_per_channel
-from .stanstr import block, flatten, jlint, read_observed, pyhf_par_names
+from .stanstr import block, flatten, jlint, read_observed
+from .par_names import get_stan_par_names, get_pyhf_par_data
 from .tracer import mergetraced
+from .run import perturb_param_file, run_pyhf_model, run_stanhf_model
 
 
 VERSION = importlib.metadata.version(__package__)
@@ -38,21 +42,53 @@ class Convert:
     Convert histfactory into Stan code
     """
 
-    def __init__(self, hf_json_file_name):
+    def __init__(self, hf_file_name, patch=None):
         """
-        @param hf_json_file_name JSON file name
+        @param hf_file_name JSON file name
         """
-        self.hf_json_file_name = hf_json_file_name
+        self.hf_file_name = hf_file_name
+        self.patch = patch
 
-        with open(hf_json_file_name, encoding="utf-8") as hf_file:
-            self._workspace = json.load(hf_file)
+    @cached_property
+    def _workspace(self):
+        """
+        @returns Workspace, patched if necessary
+        """
+        with open(self.hf_file_name, encoding="utf-8") as hf_file:
+            workspace = pyhf.Workspace(json.load(hf_file))
 
-    def metadata(self):
+        if self.patch is None:
+            return workspace
+
+        patch_json_file_name, patch_number = self.patch
+
+        with open(patch_json_file_name, encoding="utf-8") as patch_file:
+            patch_set = pyhf.PatchSet(json.load(patch_file))
+
+        patch = patch_set.patches[patch_number]
+        return patch.apply(workspace)
+
+    @cached_property
+    def _root(self):
+        """
+        @returns Root for default file names
+        """
+        root = os.path.splitext(self.hf_file_name)[0]
+
+        if self.patch is None:
+            return root
+
+        patch_json_file_name, patch_number = self.patch
+        patch_root = os.path.splitext(
+            os.path.split(patch_json_file_name)[1])[0]
+        return f"{root}_{patch_root}_{patch_number}"
+
+    def _metadata(self):
         """
         @returns Metadata for Stan program
         """
         hf_version = self._workspace.get("version")
-        return f"""// histfactory json {self.hf_json_file_name}
+        return f"""// histfactory json {self.hf_file_name}
                    // histfactory spec version {hf_version}
                    // converted with stanhf {VERSION}"""
 
@@ -134,14 +170,7 @@ class Convert:
         return [m for m in self._modifiers if not m.is_null]
 
     @cached_property
-    def pyhf_par_names(self):
-        """
-        @returns All parameter names in pyhf style
-        """
-        return pyhf_par_names({m.par_name: m.par_size for m in self._pars})
-
-    @cached_property
-    def filter_pars(self):
+    def _filter_pars(self):
         """
         @returns Names of parameters, fixed parameters and null parameters
         """
@@ -155,14 +184,14 @@ class Convert:
         """
         @returns Names of parameters, fixed parameters and null parameters
         """
-        return [[p.par_name for p in pars] for pars in self.filter_pars]
+        return [[p.par_name for p in pars] for pars in self._filter_pars]
 
     @cached_property
     def par_size(self):
         """
         @returns Number of parameters, fixed parameters and null parameters
         """
-        return [sum(max(p.par_size, 1) for p in pars) for pars in self.filter_pars]
+        return [sum(max(p.par_size, 1) for p in pars) for pars in self._filter_pars]
 
     @cached_property
     def model_size(self):
@@ -181,7 +210,7 @@ class Convert:
         """
         par, fixed, null = self.par_size
         channels, samples, non_null_modifiers, null_modifiers = self.model_size
-        return (f"- pyhf file '{self.hf_json_file_name}'\n"
+        return (f"- pyhf file '{self.hf_file_name}'\n"
                 f"{par} free parameters, {fixed} fixed parameters and {null} ignored null parameters\n"
                 f"{channels} channels with {samples} samples\n"
                 f"{non_null_modifiers} modifiers and {null_modifiers} ignored null modifiers")
@@ -257,7 +286,7 @@ class Convert:
         """
         @returns Blocks for Stan program
         """
-        blocks = [self.metadata(),
+        blocks = [self._metadata(),
                   self.functions_block(),
                   self.data_block(),
                   self.transformed_data_block(),
@@ -267,11 +296,16 @@ class Convert:
                   self.generated_quantities_block()]
         return "\n\n".join([b for b in blocks if b is not None])
 
-    def write_stan_file(self, file_name):
+    def write_stan_file(self, file_name=None):
         """
         Write Stan program to a file
+        
+        @returns File name of Stan program
         """
-        if is_newer(self.hf_json_file_name, file_name):
+        if file_name is None:
+            file_name = f"{self._root}.stan"
+
+        if is_newer(self.hf_file_name, file_name):
 
             with open(file_name, "w", encoding="utf-8") as stan_file:
                 stan_file.write(self.to_stan())
@@ -282,41 +316,104 @@ class Convert:
                 warnings.warn(f"did not lint --- {str(err)}")
         else:
             warnings.warn(
-                f"not overwriting {file_name} as newer than {self.hf_json_file_name}")
+                f"not overwriting {file_name} as newer than {self.hf_file_name}")
 
-    def write_stan_data_file(self, file_name):
+        return file_name
+
+    def write_stan_data_file(self, file_name=None):
         """
         Write Stan data to a file
+        
+        @returns File name of Stan data file
         """
-        if is_newer(self.hf_json_file_name, file_name):
+        if file_name is None:
+            file_name = f"{self._root}_data.json"
+
+        if is_newer(self.hf_file_name, file_name):
             write_stan_json(file_name, self.data_card())
             jlint(file_name)
         else:
             warnings.warn(
-                f"not overwriting {file_name} as newer than {self.hf_json_file_name}")
+                f"not overwriting {file_name} as newer than {self.hf_file_name}")
 
-    def write_stan_init_file(self, file_name):
+        return file_name
+
+    def write_stan_init_file(self, file_name=None):
         """
         Write Stan initial values to a file
+        
+        @returns File name of Stan init file
         """
-        if is_newer(self.hf_json_file_name, file_name):
+        if file_name is None:
+            file_name = f"{self._root}_init.json"
+
+        if is_newer(self.hf_file_name, file_name):
             write_stan_json(file_name, self.init_card())
             jlint(file_name)
         else:
             warnings.warn(
-                f"not overwriting {file_name} as newer than {self.hf_json_file_name}")
+                f"not overwriting {file_name} as newer than {self.hf_file_name}")
 
+        return file_name
 
-def convert(hf_json_file):
-    """
-    @param hf_json_file Name of hf file
-    @returns Root name of output files
-    """
-    root = os.path.splitext(hf_json_file)[0]
+    def write_to_disk(self):
+        """
+        Write Stan model, data and initial values to disk
+        
+        @returns File names of Stan model files
+        """
+        return self.write_stan_file(), self.write_stan_data_file(), self.write_stan_init_file()
 
-    convert_ = Convert(hf_json_file)
-    convert_.write_stan_file(f"{root}.stan")
-    convert_.write_stan_data_file(f"{root}_data.json")
-    convert_.write_stan_init_file(f"{root}_init.json")
+    def build(self):
+        """
+        Build Stan model
+        
+        @returns File name of executable Stan model
+        """
+        stan_file_name = self.write_stan_file()
+        return compile_stan_file(stan_file_name)
 
-    return root, convert_
+    def validate_target(self, rng=None):
+        """
+        Validates stanhf target against pyhf
+        """
+        data_file_name = self.write_stan_data_file()
+        init_file_name = self.write_stan_init_file()
+        exe_file_name = self.build()
+
+        pars = perturb_param_file(init_file_name, rng)
+
+        stanhf_target = run_stanhf_model(
+            pars, data_file_name, exe_file_name)
+        nhf_target = run_pyhf_model(pars, self._workspace)
+
+        if not np.isclose(stanhf_target, nhf_target):
+            raise RuntimeError(
+                f"no agreement in target:\n"
+                f"Stan = {stanhf_target}\n"
+                f"pyhf = {nhf_target}\n"
+                f"delta = {stanhf_target - nhf_target}\n"
+                f"for pars = {pars}")
+
+    def validate_par_names(self):
+        """
+        Validates stanhf parameter names and sizes against pyhf
+        """
+        pyhf_par_data = get_pyhf_par_data(self._workspace)
+        stanhf_par_data = {m.par_name: max(1, m.par_size) for m in self._pars}
+
+        if stanhf_par_data != pyhf_par_data:
+            raise RuntimeError(
+                "no agreement in parameter names & sizes:\n"
+                f"Stanhf = {stanhf_par_data}\n"
+                f"pyhf = {pyhf_par_data}")
+
+        stanhf_par_names = self.par_names[0]
+        stan_file_name = self.write_stan_file()
+        stan_par_names = get_stan_par_names(stan_file_name)
+
+        if set(stanhf_par_names) != set(stan_par_names):
+            raise RuntimeError(
+                "no agreement in parameter names:\n"
+                f"Stanhf = {stanhf_par_names}\n"
+                f"Stan = {stan_par_names}")

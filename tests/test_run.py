@@ -7,7 +7,7 @@ import os
 
 import numpy as np
 
-from stanhf import convert, validate, build
+from stanhf import Convert
 
 
 CWD = os.path.dirname(os.path.realpath(__file__))
@@ -19,6 +19,6 @@ def test_target():
     """
     Validate output from Stan against pyhf
     """
-    root, convert_ = convert(EXAMPLE)
-    build(root)
-    validate(root, convert_, rng=RNG)
+    convert = Convert(EXAMPLE)
+    convert.validate_par_names()
+    convert.validate_target(RNG)

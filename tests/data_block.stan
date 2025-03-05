@@ -1,38 +1,38 @@
 data{
-vector[2] nominal_singlechannel_signal; // from Sample.stan_data [sample.py:L66]
-vector[2] nominal_singlechannel_background; // from Sample.stan_data [sample.py:L66]
-vector[2] nominal_secondchannel_signal; // from Sample.stan_data [sample.py:L66]
-vector[2] nominal_secondchannel_background; // from Sample.stan_data [sample.py:L66]
-tuple(real, real) normal_lumi; // from Measured.stan_data [config.py:L27]
-tuple(vector[2], vector[2]) lu_singlechannel_signal_histosys_k_histosys; // from HistoSys.stan_data [modifier.py:L241]
-tuple(real, real) lu_singlechannel_signal_normsys_k_normsys; // from NormSys.stan_data [modifier.py:L280]
-vector[2] rel_error_singlechannel_signal_shapesys_k_shapesys; // from ShapeSys.stan_data [modifier.py:L206]
-vector[2] stdev_singlechannel_signal_staterror_k_staterror; // from StatError.stan_data [modifier.py:L143]
-tuple(vector[2], vector[2]) lu_singlechannel_background_histosys_k_histosys; // from HistoSys.stan_data [modifier.py:L241]
-tuple(real, real) lu_singlechannel_background_normsys_k_normsys; // from NormSys.stan_data [modifier.py:L280]
-vector[2] rel_error_singlechannel_background_shapesys_l_shapesys; // from ShapeSys.stan_data [modifier.py:L206]
-vector[2] stdev_singlechannel_background_staterror_l_staterror; // from StatError.stan_data [modifier.py:L143]
-tuple(vector[2], vector[2]) lu_secondchannel_signal_histosys_k_histosys; // from HistoSys.stan_data [modifier.py:L241]
-tuple(real, real) lu_secondchannel_signal_normsys_k_normsys; // from NormSys.stan_data [modifier.py:L280]
-vector[2] rel_error_secondchannel_signal_shapesys_m_shapesys; // from ShapeSys.stan_data [modifier.py:L206]
-vector[2] stdev_secondchannel_signal_staterror_m_staterror; // from StatError.stan_data [modifier.py:L143]
-tuple(vector[2], vector[2]) lu_secondchannel_background_histosys_k_histosys; // from HistoSys.stan_data [modifier.py:L241]
-tuple(real, real) lu_secondchannel_background_normsys_k_normsys; // from NormSys.stan_data [modifier.py:L280]
-vector[2] rel_error_secondchannel_background_shapesys_n_shapesys; // from ShapeSys.stan_data [modifier.py:L206]
-vector[2] stdev_secondchannel_background_staterror_n_staterror; // from StatError.stan_data [modifier.py:L143]
-tuple(real, real) lu_k_histosys; // from FreeParameter.stan_data [config.py:L85]
-tuple(real, real) lu_k_normsys; // from FreeParameter.stan_data [config.py:L85]
-tuple(vector[2], vector[2]) lu_k_shapesys; // from FreeParameter.stan_data [config.py:L85]
-tuple(vector[2], vector[2]) lu_k_staterror; // from FreeParameter.stan_data [config.py:L85]
-tuple(real, real) lu_lumi; // from FreeParameter.stan_data [config.py:L85]
-tuple(real, real) lu_k_normfactor; // from FreeParameter.stan_data [config.py:L85]
-tuple(vector[2], vector[2]) lu_k_shapefactor; // from FreeParameter.stan_data [config.py:L85]
-tuple(vector[2], vector[2]) lu_l_shapesys; // from FreeParameter.stan_data [config.py:L85]
-tuple(vector[2], vector[2]) lu_l_staterror; // from FreeParameter.stan_data [config.py:L85]
-tuple(vector[2], vector[2]) lu_m_shapesys; // from FreeParameter.stan_data [config.py:L85]
-tuple(vector[2], vector[2]) lu_m_staterror; // from FreeParameter.stan_data [config.py:L85]
-tuple(vector[2], vector[2]) lu_n_shapesys; // from FreeParameter.stan_data [config.py:L85]
-tuple(vector[2], vector[2]) lu_n_staterror; // from FreeParameter.stan_data [config.py:L85]
-array[2] int observed_singlechannel; // from Channel.stan_data [channel.py:L59]
-array[2] int observed_secondchannel; // from Channel.stan_data [channel.py:L59]
+vector[2] nominal_singlechannel_signal;  
+vector[2] nominal_singlechannel_background;  
+vector[2] nominal_secondchannel_signal;  
+vector[2] nominal_secondchannel_background;  
+tuple(real, real) normal_lumi;  
+tuple(vector[2], vector[2]) lu_singlechannel_signal_histosys_k_histosys;  
+tuple(real, real) lu_singlechannel_signal_normsys_k_normsys;  
+vector[2] rel_error_singlechannel_signal_shapesys_k_shapesys;  
+vector[2] stdev_singlechannel_signal_staterror_k_staterror;  
+tuple(vector[2], vector[2]) lu_singlechannel_background_histosys_k_histosys;  
+tuple(real, real) lu_singlechannel_background_normsys_k_normsys;  
+vector[2] rel_error_singlechannel_background_shapesys_l_shapesys;  
+vector[2] stdev_singlechannel_background_staterror_l_staterror;  
+tuple(vector[2], vector[2]) lu_secondchannel_signal_histosys_k_histosys;  
+tuple(real, real) lu_secondchannel_signal_normsys_k_normsys;  
+vector[2] rel_error_secondchannel_signal_shapesys_m_shapesys;  
+vector[2] stdev_secondchannel_signal_staterror_m_staterror;  
+tuple(vector[2], vector[2]) lu_secondchannel_background_histosys_k_histosys;  
+tuple(real, real) lu_secondchannel_background_normsys_k_normsys;  
+vector[2] rel_error_secondchannel_background_shapesys_n_shapesys;  
+vector[2] stdev_secondchannel_background_staterror_n_staterror;  
+tuple(real, real) lu_k_histosys;  
+tuple(real, real) lu_k_normsys;  
+tuple(vector[2], vector[2]) lu_k_shapesys;  
+tuple(vector[2], vector[2]) lu_k_staterror;  
+tuple(real, real) lu_lumi;  
+tuple(real, real) lu_k_normfactor;  
+tuple(vector[2], vector[2]) lu_k_shapefactor;  
+tuple(vector[2], vector[2]) lu_l_shapesys;  
+tuple(vector[2], vector[2]) lu_l_staterror;  
+tuple(vector[2], vector[2]) lu_m_shapesys;  
+tuple(vector[2], vector[2]) lu_m_staterror;  
+tuple(vector[2], vector[2]) lu_n_shapesys;  
+tuple(vector[2], vector[2]) lu_n_staterror;  
+array[2] int observed_singlechannel;  
+array[2] int observed_secondchannel;  
 }

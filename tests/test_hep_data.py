@@ -9,7 +9,7 @@ import numpy as np
 import pytest
 import pyhf.contrib.utils
 
-from stanhf import convert, validate, build
+from stanhf import Convert
 
 
 RNG = np.random.default_rng(111)
@@ -45,12 +45,11 @@ DATA = [("10.17182/hepdata.134244.v1/r2", "BkgOnly.json"),
         ("10.17182/hepdata.89408.v3/r2", "RegionC/BkgOnly.json")]
 
 
-def fetch_hep_data(doi, json_file):
+def fetch_hep_data(doi):
     """
     @returns Downloaded json file path
     """
     folder_name = doi.replace("/", "_").replace(".", "_")
-    path = os.path.join(folder_name, json_file)
 
     if not os.path.exists(folder_name):
         url = f"https://doi.org/{doi}"
@@ -58,8 +57,7 @@ def fetch_hep_data(doi, json_file):
         pyhf.contrib.utils.download(url, folder_name)
         print(f"downloaded {folder_name}")
 
-    assert os.path.exists(path)
-    return path
+    return folder_name
 
 
 @pytest.mark.parametrize("data", DATA if os.environ.get("PYTEST_ALL_HEP_DATA") else DATA[-3:])
@@ -68,7 +66,12 @@ def test_validate_hep_data(data):
     Test a HEP-DATA histfactory model
     """
     doi, json_file = data
-    path = fetch_hep_data(doi, json_file)
-    root, convert_ = convert(path)
-    build(root)
-    validate(root, convert_, rng=RNG)
+    folder_name = fetch_hep_data(doi)
+    path = os.path.join(folder_name, json_file)
+
+    if not os.path.exists(path):
+        raise RuntimeError(f"{path} from {doi} does not exist")
+
+    convert = Convert(path)
+    convert.validate_par_names()
+    convert.validate_target(RNG)

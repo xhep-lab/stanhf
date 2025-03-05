@@ -9,8 +9,8 @@ import os
 import click
 from cmdstanpy import cmdstan_path
 
-from .run import install, build as stan_build, validate as stan_validate
-from .convert import convert
+from .run import install
+from .convert import Convert
 
 
 VERSION = importlib.metadata.version(__package__)
@@ -27,7 +27,7 @@ def print_cmdstan_path(ctx, _, value):
 
 
 @click.command()
-@click.argument('hf_json_file_name', type=click.Path(exists=True))
+@click.argument('hf_file_name', type=click.Path(exists=True))
 @click.version_option(VERSION, message="%(version)s")
 @click.option('--build/--no-build', default=True,
               help="Build Stan program.")
@@ -35,13 +35,13 @@ def print_cmdstan_path(ctx, _, value):
               help="Validate Stan program.")
 @click.option('--cmdstan-path', is_flag=True, callback=print_cmdstan_path,
               expose_value=False, is_eager=True)
-def cli(hf_json_file_name, build, validate):
+@click.option('--patch', default=None, nargs=2, type=(click.Path(exists=True), click.IntRange(0)))
+def cli(hf_file_name, build, validate, patch):
     """
     Convert, build and validate HF_JSON_FILE_NAME as a Stan model.
     """
-    root, convert_ = convert(hf_json_file_name)
-    click.echo(f"- Stan model files created at {root}*")
-    click.echo(convert_)
+    convert = Convert(hf_file_name, patch)
+    click.echo(convert)
 
     if build:
 
@@ -51,13 +51,20 @@ def cli(hf_json_file_name, build, validate):
         local = os.path.join(stan_path, "build", "local")
         click.echo(f"- Build settings controlled at {local}")
 
-        stan_build(root)
-        click.echo(f"- Stan executable created at {root}")
+        stan_file_name, data_file_name, init_file_name = convert.write_to_disk()
+        click.echo(
+            f"- Stan files created at {stan_file_name}, {data_file_name} and {init_file_name}")
 
-        cmd = f"{root} sample num_chains=4 data file={root}_data.json init={root}_init.json"
+        exe_file_name = convert.build()
+        click.echo(f"- Stan executable created at {exe_file_name}")
+
+        cmd = f"{exe_file_name} sample num_chains=4 data file={data_file_name} init={init_file_name}"
         click.echo(f"- Try e.g., {cmd}")
 
     if validate:
 
-        stan_validate(root, convert_)
-        click.echo("- Validated parameter names & target")
+        convert.validate_par_names()
+        click.echo("- Validated parameter names")
+
+        convert.validate_target()
+        click.echo("- Validated target")

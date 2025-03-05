@@ -1,4 +1,5 @@
 functions{
+ 
 real poisson_real_lpdf(data vector k, vector lambda) {
   return sum(k .* log(lambda) - lambda - lgamma(k + 1.));
 }
