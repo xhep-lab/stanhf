@@ -284,7 +284,7 @@ class NormSys(Modifier):
         """
         return f"tuple(real, real) {self.lu_name};"
 
-    @add_metadata_comment
+    @add_metadata_entry
     def stan_data_card(self):
         """
         @returns Set data for one-sigma lower and upper values for multiplicative corrections

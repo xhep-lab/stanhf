@@ -75,7 +75,7 @@ class FreeParameter(Stan):
             return f"real{bound} {self.par_name};"
         return f"vector{bound}[{self.par_size}] {self.par_name};"
 
-    @add_metadata_comment
+    @add_metadata_entry
     def stan_init_card(self):
         """
         @returns Initialization or default for parameter
@@ -91,7 +91,7 @@ class FreeParameter(Stan):
             return f"tuple(real, real) {self.par_bound_name};"
         return f"tuple(vector[{self.par_size}], vector[{self.par_size}]) {self.par_bound_name};"
 
-    @add_metadata_comment
+    @add_metadata_entry
     def stan_data_card(self):
         """
         @returns Data for bounds for parameter
