@@ -15,7 +15,7 @@ CWD = os.path.dirname(os.path.realpath(__file__))
 EXAMPLE = os.path.normpath(os.path.join(CWD, "..", "examples", "example.json"))
 
 CON = Convert(EXAMPLE)
-BLOCKS = ["functions_block", "metadata", "data_block",
+BLOCKS = ["functions_block", "data_block",
           "transformed_data_block", "pars_block", "transformed_pars_block"]
 
 
