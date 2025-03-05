@@ -47,7 +47,7 @@ def run_pyhf_model(pars, workspace):
 
 def perturb(param, scale=0.01, rng=None):
     """
-    @param x Parameter to be perturbed
+    @param param Parameter to be perturbed
     @returns Parameter perturbed by random normal deviate
     """
     if rng is None:
