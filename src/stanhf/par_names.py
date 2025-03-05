@@ -38,5 +38,6 @@ def get_stan_par_names(stan_file_name):
     """
     @returns Names of Stan model parameters
     """
-    src_info = compilation.src_info(stan_file_name, compilation.CompilerOptions())
+    src_info = compilation.src_info(
+        stan_file_name, compilation.CompilerOptions())
     return list(src_info["parameters"].keys())

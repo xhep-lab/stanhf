@@ -6,7 +6,7 @@ Parse a channel from a hf model
 from .stanabc import Stan
 from .sample import Sample
 from .stanstr import join, add_to_target, flatten
-from .tracer import trace
+from .tracer import add_metadata_comment, add_metadata_entry
 
 
 class Channel(Stan):
@@ -40,7 +40,7 @@ class Channel(Stan):
         """
         return flatten([s.modifiers for s in self.samples])
 
-    @trace
+    @add_metadata_comment
     def stan_trans_pars(self):
         """
         @returns Total expected number of events from all samples in channel
@@ -48,7 +48,7 @@ class Channel(Stan):
         total = " + ".join([s.par_name for s in self.samples])
         return f"vector[{self.nbins}] {self.expected_name} = {total};"
 
-    @trace
+    @add_metadata_comment
     def stan_model(self):
         """
         @returns Poisson log-likelihood for total expected events in channel
@@ -56,21 +56,21 @@ class Channel(Stan):
         return add_to_target(
             "poisson_lpmf", self.observed_name, self.expected_name)
 
-    @trace
+    @add_metadata_comment
     def stan_data(self):
         """
         @returns Declare observed counts in channel
         """
         return f"array[{self.nbins}] int {self.observed_name};"
 
-    @trace
+    @add_metadata_entry
     def stan_data_card(self):
         """
         @returns Observed counts in channel
         """
         return {self.observed_name: self.observed}
 
-    @trace
+    @add_metadata_comment
     def stan_gen_quant(self):
         """
         @returns Posterior predictive for counts in channel

@@ -10,7 +10,7 @@ from functools import cached_property
 from .stanabc import Stan
 from .stanstr import join
 from .modifier import find_modifier, order_modifiers
-from .tracer import trace
+from .tracer import add_metadata_comment, add_metadata_entry
 
 
 class Sample(Stan):
@@ -56,21 +56,21 @@ class Sample(Stan):
         modifiers = {m.name: m for m in modifiers}.values()
         return order_modifiers(modifiers)
 
-    @trace
+    @add_metadata_comment
     def stan_trans_pars(self):
         """
         @returns Declare and set expected events in this channel
         """
         return f"vector[{self.nbins}] {self.par_name} = {self.nominal_name};"
 
-    @trace
+    @add_metadata_comment
     def stan_data(self):
         """
         @returns Declare data for this sample
         """
         return f"vector[{self.nbins}] {self.nominal_name};"
 
-    @trace
+    @add_metadata_entry
     def stan_data_card(self):
         """
         @returns Set data for this sample

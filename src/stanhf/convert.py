@@ -299,7 +299,7 @@ class Convert:
     def write_stan_file(self, file_name=None):
         """
         Write Stan program to a file
-        
+
         @returns File name of Stan program
         """
         if file_name is None:
@@ -323,7 +323,7 @@ class Convert:
     def write_stan_data_file(self, file_name=None):
         """
         Write Stan data to a file
-        
+
         @returns File name of Stan data file
         """
         if file_name is None:
@@ -341,7 +341,7 @@ class Convert:
     def write_stan_init_file(self, file_name=None):
         """
         Write Stan initial values to a file
-        
+
         @returns File name of Stan init file
         """
         if file_name is None:
@@ -359,7 +359,7 @@ class Convert:
     def write_to_disk(self):
         """
         Write Stan model, data and initial values to disk
-        
+
         @returns File names of Stan model files
         """
         return self.write_stan_file(), self.write_stan_data_file(), self.write_stan_init_file()
@@ -367,7 +367,7 @@ class Convert:
     def build(self):
         """
         Build Stan model
-        
+
         @returns File name of executable Stan model
         """
         stan_file_name = self.write_stan_file()

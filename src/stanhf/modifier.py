@@ -10,7 +10,7 @@ import numpy as np
 
 from .stanabc import Stan
 from .stanstr import join, add_to_target
-from .tracer import trace
+from .tracer import add_metadata_comment, add_metadata_entry
 
 
 CONSTRAINED = ["histosys", "normsys"]
@@ -78,7 +78,7 @@ class Factor(Modifier):
     par_init = [1.]
     par_bound = [[0., 10.]]
 
-    @trace
+    @add_metadata_comment
     def stan_trans_pars(self):
         """
         @returns Scale a sample by a factor
@@ -102,7 +102,7 @@ class ShapeFactor(Modifier):
     def par_init(self):
         return [1.] * self.par_size
 
-    @trace
+    @add_metadata_comment
     def stan_trans_pars(self):
         """
         @returns Scale the sample by a bin-wise factor
@@ -133,21 +133,21 @@ class StatError(Modifier):
     def par_init(self):
         return [1.] * self.par_size
 
-    @trace
+    @add_metadata_comment
     def stan_trans_pars(self):
         """
         @returns Scale the sample by a bin-wise factor
         """
         return f"{self.sample.par_name} .*= {self.par_name};"
 
-    @trace
+    @add_metadata_comment
     def stan_data(self):
         """
         @returns Declare data for standard deviation of normal
         """
         return f"vector[{self.par_size}] {self.stdev_name};"
 
-    @trace
+    @add_metadata_entry
     def stan_data_card(self):
         """
         @returns Set data for standard deviation of normal
@@ -180,7 +180,7 @@ class ShapeSys(Modifier):
     def par_init(self):
         return [1.] * self.par_size
 
-    @trace
+    @add_metadata_comment
     def stan_trans_pars(self):
         """
         @returns Scale the sample by a bin-wise factor and defines rate parameters
@@ -188,14 +188,14 @@ class ShapeSys(Modifier):
         return f"""{self.sample.par_name} .*= {self.par_name};
                    vector[{self.par_size}] {self.expected_name} = {self.par_name} .* {self.observed_name};"""
 
-    @trace
+    @add_metadata_comment
     def stan_trans_data(self):
         """
         @returns Data for auxiliary measurements of rate parameters
         """
         return f"vector[{self.par_size}] {self.observed_name} = square({self.sample.nominal_name} ./ {self.rel_error_name});"
 
-    @trace
+    @add_metadata_comment
     def stan_model(self):
         """
         @returns Poisson constraint for rate parameters
@@ -203,14 +203,14 @@ class ShapeSys(Modifier):
         return add_to_target("poisson_real_lpdf",
                              self.observed_name, self.expected_name)
 
-    @trace
+    @add_metadata_comment
     def stan_data(self):
         """
         @returns Declare data for relative error in auxiliary measurement
         """
         return f"vector[{self.par_size}] {self.rel_error_name};"
 
-    @trace
+    @add_metadata_entry
     def stan_data_card(self):
         """
         @returns Set data for standard deviation of normal
@@ -238,21 +238,21 @@ class HistoSys(Modifier):
     def is_null(self):
         return self.lu_data[0] == self.lu_data[1] == self.sample.nominal
 
-    @trace
+    @add_metadata_comment
     def stan_data(self):
         """
         @returns Declare one-sigma lower and upper values for additive corrections
         """
         return f"tuple(vector[{self.sample.nbins}], vector[{self.sample.nbins}]) {self.lu_name};"
 
-    @trace
+    @add_metadata_entry
     def stan_data_card(self):
         """
         @returns Set data for one-sigma lower and upper values for additive corrections
         """
         return {self.lu_name: self.lu_data}
 
-    @trace
+    @add_metadata_comment
     def stan_trans_pars(self):
         """
         @returns Interpolated additive correction to sample
@@ -277,21 +277,21 @@ class NormSys(Modifier):
     def is_null(self):
         return self.lu_data[0] == self.lu_data[1] == 1.
 
-    @trace
+    @add_metadata_comment
     def stan_data(self):
         """
         @returns Declare one-sigma lower and upper values for multiplicative corrections
         """
         return f"tuple(real, real) {self.lu_name};"
 
-    @trace
+    @add_metadata_comment
     def stan_data_card(self):
         """
         @returns Set data for one-sigma lower and upper values for multiplicative corrections
         """
         return {self.lu_name: self.lu_data}
 
-    @trace
+    @add_metadata_comment
     def stan_trans_pars(self):
         """
         @returns Interpolated multiplicative correction to sample
@@ -310,7 +310,7 @@ class StandardNormal(Stan):
         """
         self.par_name = par_name
 
-    @trace
+    @add_metadata_comment
     def stan_model(self):
         """
         @returns Constrain by standard normal
@@ -334,7 +334,7 @@ class CombinedStatError(Stan):
         if np.any(var == 0.):
             warnings.warn(f"variance was zero for some bins for {par_name}")
 
-    @trace
+    @add_metadata_comment
     def stan_trans_data(self):
         """
         @returns Compute standard deviation of measurement
@@ -343,7 +343,7 @@ class CombinedStatError(Stan):
         var = " + ".join(f"{m.stdev_name}.^2" for m in self.modifiers)
         return f"vector[{self.channel.nbins}] {self.stdev_name} = sqrt({var}) ./ ({nominal});"
 
-    @trace
+    @add_metadata_comment
     def stan_model(self):
         """
         @returns Constrain by normal centered at one
