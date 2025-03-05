@@ -23,7 +23,7 @@ dependencies = [
 ]
 
 [project.scripts]
-stanhf = "stanhf:cli"
+stanhf = "stanhf.cli:cli"
 
 [tool.setuptools.package-data]
 stanhf = ["stanhf.stanfunctions"]
