@@ -227,7 +227,7 @@ class HistoSys(Modifier):
     A bin-wise additive modifier from interpolation
     """
     additive = True
-    costrained = True
+    constrained = True
     par_size = 0
     par_init = [0.]
     par_bound = [[-5., 5.]]
