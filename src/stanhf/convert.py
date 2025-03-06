@@ -45,9 +45,30 @@ class Convert:
     def __init__(self, hf_file_name, patch=None):
         """
         @param hf_file_name JSON file name
+        @param patch file name and number of a patchset
         """
         self.hf_file_name = hf_file_name
         self.patch = patch
+
+    @cached_property
+    def _patch(self):
+        """
+        @returns Patch with added metadata, if present
+        """
+        if self.patch is None:
+            return None
+
+        patch_file_name, patch_number = self.patch
+
+        with open(patch_file_name, encoding="utf-8") as patch_file:
+            patch_set = pyhf.PatchSet(json.load(patch_file))
+
+        patch = patch_set.patches[patch_number]
+
+        patch._metadata = patch.metadata | patch_set.metadata
+        patch._metadata["version"] = patch_set.version
+
+        return patch
 
     @cached_property
     def _workspace(self):
@@ -57,16 +78,10 @@ class Convert:
         with open(self.hf_file_name, encoding="utf-8") as hf_file:
             workspace = pyhf.Workspace(json.load(hf_file))
 
-        if self.patch is None:
+        if self._patch is None:
             return workspace
 
-        patch_file_name, patch_number = self.patch
-
-        with open(patch_file_name, encoding="utf-8") as patch_file:
-            patch_set = pyhf.PatchSet(json.load(patch_file))
-
-        patch = patch_set.patches[patch_number]
-        return patch.apply(workspace)
+        return self._patch.apply(workspace)
 
     @cached_property
     def _root(self):
@@ -75,22 +90,40 @@ class Convert:
         """
         root = os.path.splitext(self.hf_file_name)[0]
 
-        if self.patch is None:
+        if self._patch is None:
             return root
 
-        patch_file_name, patch_number = self.patch
-        patch_root = os.path.splitext(
-            os.path.split(patch_file_name)[1])[0]
-        return f"{root}_{patch_root}_{patch_number}"
+        return f"{root}_{self._patch.name}"
 
-    def _metadata(self):
+    def _stanhf_metadata(self):
         """
         @returns Metadata for Stan program
         """
         hf_version = self._workspace.get("version")
+
         return f"""// histfactory json {self.hf_file_name}
                    // histfactory spec version {hf_version}
                    // converted with stanhf {VERSION}"""
+
+    def _patch_metadata(self):
+        """
+        @returns Metadata for pyhf patch
+        """
+        if self.patch is None:
+            return "// no patch applied"
+
+        return f"""
+                // description: {self._patch.metadata['description']}
+                // patchset id: {self._patch.metadata['analysis_id']}
+                // version: {self._patch.metadata['version']}
+                // patch: {self._patch.name}
+                """
+
+    def _metadata(self):
+        """
+        @returns Combined metadata for program
+        """
+        return self._stanhf_metadata() + "\n\n" + self._patch_metadata()
 
     @cached_property
     def _samples(self):
@@ -210,7 +243,9 @@ class Convert:
         """
         par, fixed, null = self.par_size
         channels, samples, non_null_modifiers, null_modifiers = self.model_size
-        return (f"- pyhf file '{self.hf_file_name}'\n"
+        patch = f"'{self._patch.name}'" if self._patch else "no"
+
+        return (f"- pyhf file '{self.hf_file_name}' with {patch} patch applied\n"
                 f"{par} free parameters, {fixed} fixed parameters and {null} ignored null parameters\n"
                 f"{channels} channels with {samples} samples\n"
                 f"{non_null_modifiers} modifiers and {null_modifiers} ignored null modifiers")

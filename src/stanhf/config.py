@@ -184,7 +184,8 @@ def check_param_sizes(modifiers):
 
     for m in modifiers:
         if m.par_size != par_size[m.par_name]:
-            raise RuntimeError(f"{m.par_name} appears with sizes {m.par_size} and {par_size[m.par_name]}")
+            raise RuntimeError(
+                f"{m.par_name} appears with sizes {m.par_size} and {par_size[m.par_name]}")
 
 
 def find_params(config, modifiers):
