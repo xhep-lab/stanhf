@@ -50,9 +50,9 @@ def flatten(list_):
     return flat
 
 
-def jlint(file_name):
+def format_json_file(file_name):
     """
-    @param file_name JSON file to be linted by indenting and sorting keys
+    @param file_name JSON file to be formatted by indenting and sorting keys
     """
     with open(file_name, encoding="utf-8") as json_file:
         data = json.load(json_file)

@@ -7,7 +7,7 @@ Including measurements, initial choices of parameters and bounds.
 
 from .stanabc import Stan
 from .stanstr import join, add_to_target, read_par_bound, read_par_init
-from .tracer import add_metadata_comment, add_metadata_entry
+from .metadata import add_metadata_comment, add_metadata_entry
 
 
 class Measured(Stan):

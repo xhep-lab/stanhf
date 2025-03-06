@@ -10,7 +10,7 @@ from functools import cached_property
 from .stanabc import Stan
 from .stanstr import join
 from .modifier import find_modifier, order_modifiers
-from .tracer import add_metadata_comment, add_metadata_entry
+from .metadata import add_metadata_comment, add_metadata_entry
 
 
 class Sample(Stan):

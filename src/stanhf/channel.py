@@ -6,7 +6,7 @@ Parse a channel from a hf model
 from .stanabc import Stan
 from .sample import Sample
 from .stanstr import join, add_to_target, flatten
-from .tracer import add_metadata_comment, add_metadata_entry
+from .metadata import add_metadata_comment, add_metadata_entry
 
 
 class Channel(Stan):

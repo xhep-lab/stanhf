@@ -52,12 +52,17 @@ def add_metadata_comment(func):
     return wrapped
 
 
-def mergetraced(list_):
+def shallow_merge(list_):
     """
-    @returns Merged list of dictionaries & deepmerged metadata entries
+    @returns Shallow-merge a list of dictionaries
     """
-    list_ = [item for item in list_ if item is not None]
-    merged = {k: v for d in list_ for k, v in d.items()}
-    metadata = [d.get(METADATA, {}) for d in list_]
-    merged[METADATA] = {k: v for d in metadata for k, v in d.items()}
+    return {k: v for d in list_ if d for k, v in d.items()}
+
+
+def merge_metadata(list_):
+    """
+    @returns Shallow-merged list of dictionaries with shallow-merged metadata
+    """
+    merged = shallow_merge(list_)
+    merged[METADATA] = shallow_merge([d.pop(METADATA, {}) for d in list_ if d])
     return merged

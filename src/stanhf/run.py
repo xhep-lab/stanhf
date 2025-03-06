@@ -9,8 +9,8 @@ import warnings
 import numpy as np
 from cmdstanpy import CmdStanModel, install_cmdstan, cmdstan_path
 
-from .par_names import get_pyhf_pars
-from .tracer import METADATA
+from .pars import get_pyhf_pars
+from .metadata import METADATA
 
 
 def install(progress=True, **kwargs):

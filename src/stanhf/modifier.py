@@ -10,7 +10,7 @@ import numpy as np
 
 from .stanabc import Stan
 from .stanstr import join, add_to_target
-from .tracer import add_metadata_comment, add_metadata_entry
+from .metadata import add_metadata_comment, add_metadata_entry
 
 
 class Modifier(Stan):

@@ -17,9 +17,9 @@ from cmdstanpy import format_stan_file, write_stan_json, compile_stan_file
 from .channel import Channel
 from .config import find_measureds, find_params, FreeParameter, FixedParameter, NullParameter
 from .modifier import find_constraint, find_staterror, check_per_channel
-from .stanstr import block, flatten, jlint, read_observed
-from .par_names import get_stan_par_names, get_pyhf_par_data
-from .tracer import mergetraced
+from .stanstr import block, flatten, format_json_file, read_observed
+from .pars import get_stan_par_names, get_pyhf_par_data
+from .metadata import merge_metadata
 from .run import perturb_param_file, run_pyhf_model, run_stanhf_model
 
 
@@ -274,13 +274,13 @@ class Convert:
         """
         @returns Data for Stan program
         """
-        return mergetraced(e.stan_data_card() for e in self._data)
+        return merge_metadata([e.stan_data_card() for e in self._data])
 
     def init_card(self):
         """
         @returns Initial parameter values for Stan program
         """
-        return mergetraced(e.stan_init_card() for e in self._data)
+        return merge_metadata([e.stan_init_card() for e in self._data])
 
     def to_stan(self):
         """
@@ -331,7 +331,7 @@ class Convert:
 
         if is_newer(self.hf_file_name, file_name):
             write_stan_json(file_name, self.data_card())
-            jlint(file_name)
+            format_json_file(file_name)
         else:
             warnings.warn(
                 f"not overwriting {file_name} as newer than {self.hf_file_name}")
@@ -349,7 +349,7 @@ class Convert:
 
         if is_newer(self.hf_file_name, file_name):
             write_stan_json(file_name, self.init_card())
-            jlint(file_name)
+            format_json_file(file_name)
         else:
             warnings.warn(
                 f"not overwriting {file_name} as newer than {self.hf_file_name}")
