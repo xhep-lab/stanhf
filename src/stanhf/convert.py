@@ -34,7 +34,7 @@ def is_newer(a, b):
     """
     if not os.path.isfile(b):
         return True
-    return  max(os.path.getmtime(__file__), os.path.getmtime(a)) > os.path.getmtime(b)
+    return max(os.path.getmtime(__file__), os.path.getmtime(a)) > os.path.getmtime(b)
 
 
 class Convert:

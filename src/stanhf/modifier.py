@@ -13,9 +13,6 @@ from .stanstr import join, add_to_target
 from .tracer import add_metadata_comment, add_metadata_entry
 
 
-CONSTRAINED = ["histosys", "normsys"]
-
-
 class Modifier(Stan):
     """
     Abstract modifier representation
@@ -65,7 +62,14 @@ class Modifier(Stan):
     @property
     def per_channel(self):
         """
-        @returns Whether modifier scope limited to a single
+        @returns Whether modifier scope limited to a single channel
+        """
+        return False
+
+    @property
+    def constrained(self):
+        """
+        @returns Whether modifier is constrained by a term in likelihood
         """
         return False
 
@@ -223,6 +227,7 @@ class HistoSys(Modifier):
     A bin-wise additive modifier from interpolation
     """
     additive = True
+    costrained = True
     par_size = 0
     par_init = [0.]
     par_bound = [[-5., 5.]]
@@ -264,6 +269,7 @@ class NormSys(Modifier):
     """
     A multiplicative modifier from interpolation
     """
+    constrained = True
     par_size = 0
     par_init = [0.]
     par_bound = [[-5., 5.]]
@@ -365,7 +371,7 @@ def find_constraint(modifiers):
     """
     @returns Find constraints that are applied once to modifiers
     """
-    par_name = {m.par_name for m in modifiers if m.type in CONSTRAINED}
+    par_name = {m.par_name for m in modifiers if m.constrained}
     if not par_name:
         return None
     return StandardNormal(par_name)

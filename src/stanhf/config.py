@@ -8,7 +8,6 @@ Including measurements, initial choices of parameters and bounds.
 from .stanabc import Stan
 from .stanstr import join, add_to_target, read_par_bound, read_par_init
 from .tracer import add_metadata_comment, add_metadata_entry
-from .modifier import CONSTRAINED
 
 
 class Measured(Stan):
@@ -170,7 +169,7 @@ def find_param(config, modifier):
         return FixedParameter(config_data, modifier)
 
     if modifier.is_null:
-        if is_measured(config, modifier) or modifier.type in CONSTRAINED:
+        if is_measured(config, modifier) or modifier.constrained:
             return FixedParameter(config_data, modifier)
         return NullParameter(modifier)
 
