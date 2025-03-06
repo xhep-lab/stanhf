@@ -176,9 +176,21 @@ def find_param(config, modifier):
     return FreeParameter(config_data, modifier)
 
 
+def check_param_sizes(modifiers):
+    """
+    Check whether parameter sizes are consistent
+    """
+    par_size = {m.par_name: m.par_size for m in modifiers}
+
+    for m in modifiers:
+        if m.par_size != par_size[m.par_name]:
+            raise RuntimeError(f"{m.par_name} appears with sizes {m.par_size} and {par_size[m.par_name]}")
+
+
 def find_params(config, modifiers):
     """
-    @returns Parameters from data in configuation and hf model
+    @returns Parameters from data in configuration and hf model
     """
+    check_param_sizes(modifiers)
     unique = {m.par_name: m for m in modifiers}.values()
     return [find_param(config, m) for m in unique]
