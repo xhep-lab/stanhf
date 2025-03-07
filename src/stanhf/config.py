@@ -35,7 +35,7 @@ class Measured(Stan):
         """
         @returns Normal log-likelihood for modifier
         """
-        return add_to_target("normal_lpdf", self.par_name,
+        return add_to_target("normal", self.par_name,
                              f"{self.normal_data_name}.1", f"{self.normal_data_name}.2")
 
     @add_metadata_entry
@@ -169,8 +169,6 @@ def find_param(config, modifier):
         return FixedParameter(config_data, modifier)
 
     if modifier.is_null:
-        if is_measured(config, modifier) or modifier.constrained:
-            return FixedParameter(config_data, modifier)
         return NullParameter(modifier)
 
     return FreeParameter(config_data, modifier)
@@ -193,5 +191,5 @@ def find_params(config, modifiers):
     @returns Parameters from data in configuration and hf model
     """
     check_param_sizes(modifiers)
-    unique = {m.par_name: m for m in modifiers}.values()
+    unique = {m.par_name: m for m in modifiers if not m.is_null}.values()
     return [find_param(config, m) for m in unique]

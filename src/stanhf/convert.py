@@ -16,7 +16,7 @@ from cmdstanpy import format_stan_file, write_stan_json, compile_stan_file
 
 from .channel import Channel
 from .config import find_measureds, find_params, FreeParameter, FixedParameter, NullParameter
-from .modifier import find_constraint, find_staterror, check_per_channel
+from .modifier import find_constraints, find_staterror, check_per_channel
 from .stanstr import block, flatten, format_json_file, read_observed
 from .pars import get_stan_par_names, get_pyhf_par_data
 from .metadata import merge_metadata
@@ -177,7 +177,7 @@ class Convert:
         """
         @returns Constraints for Stan program
         """
-        return [find_constraint(self._modifiers)]
+        return find_constraints(self._modifiers)
 
     @cached_property
     def _staterror(self):
@@ -416,19 +416,19 @@ class Convert:
         init_file_name = self.write_stan_init_file()
         exe_file_name = self.build()
 
-        pars = perturb_param_file(init_file_name, rng)
+        a = perturb_param_file(init_file_name, rng)
+        b = perturb_param_file(init_file_name, rng)
 
-        stanhf_target = run_stanhf_model(
-            pars, data_file_name, exe_file_name)
-        nhf_target = run_pyhf_model(pars, self._workspace)
+        stanhf_delta = run_stanhf_model(b, data_file_name, exe_file_name) - run_stanhf_model(a, data_file_name, exe_file_name)
+        nhf_delta = run_pyhf_model(b, self._workspace) - run_pyhf_model(a, self._workspace)
 
-        if not np.isclose(stanhf_target, nhf_target):
+        if not np.isclose(stanhf_delta, nhf_delta):
             raise RuntimeError(
-                f"no agreement in target:\n"
-                f"Stan = {stanhf_target}\n"
-                f"pyhf = {nhf_target}\n"
-                f"delta = {stanhf_target - nhf_target}\n"
-                f"for pars = {pars}")
+                f"no agreement in delta log-like:\n"
+                f"Stan = {stanhf_delta}\n"
+                f"pyhf = {nhf_delta}\n"
+                f"delta = {stanhf_delta - nhf_delta}\n"
+                f"for a = {a} and b = {b}")
 
     def validate_par_names(self):
         """

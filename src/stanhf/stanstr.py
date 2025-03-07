@@ -18,10 +18,8 @@ def add_to_target(dist, var, *args):
     """
     @returns Stan contribution to target
     """
-    if not args:
-        return f"target += {dist}({var});"
     joined = ", ".join([str(a) for a in args])
-    return f"target += {dist}({var} | {joined});"
+    return f"{var} ~ {dist}({joined});"
 
 
 def block(name, data):

@@ -54,7 +54,7 @@ class Channel(Stan):
         @returns Poisson log-likelihood for total expected events in channel
         """
         return add_to_target(
-            "poisson_lpmf", self.observed_name, self.expected_name)
+            "poisson", self.observed_name, self.expected_name)
 
     @add_metadata_comment
     def stan_data(self):

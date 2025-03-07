@@ -204,7 +204,7 @@ class ShapeSys(Modifier):
         """
         @returns Poisson constraint for rate parameters
         """
-        return add_to_target("poisson_real_lpdf",
+        return add_to_target("poisson_real",
                              self.observed_name, self.expected_name)
 
     @add_metadata_comment
@@ -321,8 +321,7 @@ class StandardNormal(Stan):
         """
         @returns Constrain by standard normal
         """
-        par_name = ",".join(self.par_name)
-        return add_to_target("std_normal_lpdf", f"[{par_name}]")
+        return add_to_target("std_normal", self.par_name)
 
 
 class CombinedStatError(Stan):
@@ -354,7 +353,7 @@ class CombinedStatError(Stan):
         """
         @returns Constrain by normal centered at one
         """
-        return add_to_target("normal_lpdf", self.par_name, 1., self.stdev_name)
+        return add_to_target("normal", self.par_name, 1., self.stdev_name)
 
 
 MODIFIERS = {
@@ -367,14 +366,12 @@ MODIFIERS = {
     "shapefactor": ShapeFactor}
 
 
-def find_constraint(modifiers):
+def find_constraints(modifiers):
     """
     @returns Find constraints that are applied once to modifiers
     """
     par_name = {m.par_name for m in modifiers if m.constrained}
-    if not par_name:
-        return None
-    return StandardNormal(par_name)
+    return [StandardNormal(p) for p in par_name]
 
 
 def find_staterror(channel):
