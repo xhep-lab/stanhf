@@ -48,23 +48,23 @@ def cli(hf_file_name, build, validate, patch):
         f"- Stan files created at {stan_file_name}, {data_file_name} and {init_file_name}")
 
     if build:
-
         stan_path = install()
         click.echo(f"- Stan installed at {stan_path}")
 
         local = os.path.join(stan_path, "build", "local")
         click.echo(f"- Build settings controlled at {local}")
 
-        exe_file_name = convert.build()
+        exe_file_name = convert.build(stan_file_name)
         click.echo(f"- Stan executable created at {exe_file_name}")
 
         cmd = f"{exe_file_name} sample num_chains=4 data file={data_file_name} init={init_file_name}"
         click.echo(f"- Try e.g., {cmd}")
+    else:
+        exe_file_name = None
 
     if validate:
-
-        convert.validate_par_names()
+        convert.validate_par_names(stan_file_name)
         click.echo("- Validated parameter names")
 
-        convert.validate_target()
+        convert.validate_target(exe_file_name, stan_file_name, data_file_name, init_file_name)
         click.echo("- Validated target")

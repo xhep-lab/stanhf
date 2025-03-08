@@ -399,22 +399,28 @@ class Convert:
         """
         return self.write_stan_file(), self.write_stan_data_file(), self.write_stan_init_file()
 
-    def build(self):
+    def build(self, stan_file_name=None):
         """
         Build Stan model
 
         @returns File name of executable Stan model
         """
-        stan_file_name = self.write_stan_file()
+        if stan_file_name is None:
+            stan_file_name = self.write_stan_file()
         return compile_stan_file(stan_file_name)
 
-    def validate_target(self, rng=None):
+    def validate_target(self, exe_file_name=None, stan_file_name=None, data_file_name=None, init_file_name=None, rng=None):
         """
         Validates stanhf target against pyhf
         """
-        data_file_name = self.write_stan_data_file()
-        init_file_name = self.write_stan_init_file()
-        exe_file_name = self.build()
+        if data_file_name is None:
+            data_file_name = self.write_stan_data_file()
+
+        if init_file_name is None:
+            init_file_name = self.write_stan_init_file()
+
+        if exe_file_name is None:
+            exe_file_name = self.build(stan_file_name)
 
         a = perturb_param_file(init_file_name, rng)
         b = perturb_param_file(init_file_name, rng)
@@ -430,10 +436,13 @@ class Convert:
                 f"delta = {stanhf_delta - nhf_delta}\n"
                 f"for a = {a} and b = {b}")
 
-    def validate_par_names(self):
+    def validate_par_names(self, stan_file_name=None):
         """
         Validates stanhf parameter names and sizes against pyhf
         """
+        if stan_file_name is None:
+            stan_file_name = self.write_stan_file()
+
         pyhf_par_data = get_pyhf_par_data(self._workspace)
         stanhf_par_data = {m.par_name: max(1, m.par_size) for m in self._pars}
 
@@ -444,7 +453,6 @@ class Convert:
                 f"pyhf = {pyhf_par_data}")
 
         stanhf_par_names = self.par_names[0]
-        stan_file_name = self.write_stan_file()
         stan_par_names = get_stan_par_names(stan_file_name)
 
         if set(stanhf_par_names) != set(stan_par_names):
