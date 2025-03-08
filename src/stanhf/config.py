@@ -1,9 +1,11 @@
 """
-Parse configuaration from a hf model
-====================================
+Parse configuration from a hf model
+===================================
 
 Including measurements, initial choices of parameters and bounds.
 """
+
+import warnings
 
 from .stanabc import Stan
 from .stanstr import join, add_to_target, read_par_bound, read_par_init
@@ -51,17 +53,14 @@ class FreeParameter(Stan):
     Declare a parameter that is sampled
     """
 
-    def __init__(self, config, modifier):
+    def __init__(self, par_name, par_size, par_init, par_bound):
         """
-        @param config hf configuration for this parameter
-        @param modifier Modifier object for this parameter
+        @param par_name Name of parameter
         """
-        self.par_name = modifier.par_name
-        self.par_size = modifier.par_size
-        par_init = config.get("inits", modifier.par_init)
-        self.par_init = read_par_init(par_init, self.par_size)
-        par_bound = config.get("bounds", modifier.par_bound)
-        self.par_bound = read_par_bound(par_bound, self.par_size)
+        self.par_name = par_name
+        self.par_size = par_size
+        self.par_init = par_init
+        self.par_bound = par_bound
         self.par_bound_name = join("lu", self.par_name)
 
     @add_metadata_comment
@@ -103,15 +102,13 @@ class FixedParameter(Stan):
     Declare a fixed parameter
     """
 
-    def __init__(self, config, modifier):
+    def __init__(self, par_name, par_size, par_init):
         """
-        @param config hf configuration for this parameter
-        @param modifier Modifier object for this parameter
+        @param par_name Name of parameter
         """
-        self.par_name = modifier.par_name
-        self.par_size = modifier.par_size
-        par_init = config.get("inits", modifier.par_init)
-        self.par_init = read_par_init(par_init, self.par_size)
+        self.par_name = par_name
+        self.par_size = par_size
+        self.par_init = par_init
 
     @add_metadata_comment
     def stan_data(self):
@@ -135,61 +132,64 @@ class NullParameter(Stan):
     A null parameter
     """
 
-    def __init__(self, modifier):
+    def __init__(self, par_name, par_size):
         """
-        @param config hf configuration for this parameter
-        @param modifier Modifier object for this parameter
+        @param par_name Name of parameter
         """
-        self.par_name = modifier.par_name
-        self.par_size = modifier.par_size
+        self.par_name = par_name
+        self.par_size = par_size
 
 
-def is_measured(config, modifier):
+def is_measured(config, par_name):
     """
     @returns Whether configuration indicates a measurement
     """
-    return {"auxdata", "sigmas"} <= config.get(modifier.par_name, {}).keys()
+    return {"auxdata", "sigmas"} <= config.get(par_name, {}).keys()
 
 
 def find_measureds(config, modifiers):
     """
-    @returns Measured modifiers
+    @returns Measurement objects
     """
-    unique = {m.par_name: m for m in modifiers}.values()
-    return [Measured(config.get(m.par_name, {})) for m in unique if is_measured(config, m)]
+    unique = {m.par_name for m in modifiers if not m.is_null}
+    return [Measured(config.get(p, {})) for p in unique if is_measured(config, p)]
 
 
-def find_param(config, modifier):
+def find_par_prop(modifiers, prop):
     """
-    @returns Parameter from modifier
+    @returns Parameter name from modifiers
     """
-    config_data = config.get(modifier.par_name, {})
-
-    if config_data.get("fixed"):
-        return FixedParameter(config_data, modifier)
-
-    if modifier.is_null:
-        return NullParameter(modifier)
-
-    return FreeParameter(config_data, modifier)
+    d = [getattr(m, prop) for m in modifiers]
+    for e in d:
+        if e != d[0]:
+            warnings.warn(f"modifiers have inconsistent {prop}: {d}")
+    return d.pop()
 
 
-def check_param_sizes(modifiers):
+def find_param(par_name, par_config, modifiers):
     """
-    Check whether parameter sizes are consistent
+    @returns Parameter bounds from modifiers
     """
-    par_size = {m.par_name: m.par_size for m in modifiers}
+    par_size = find_par_prop(modifiers, "par_size")
 
-    for m in modifiers:
-        if m.par_size != par_size[m.par_name]:
-            raise RuntimeError(
-                f"{m.par_name} appears with sizes {m.par_size} and {par_size[m.par_name]}")
+    par_init = par_config.get("inits", find_par_prop(modifiers, "par_init"))
+    par_init = read_par_init(par_init, par_size)
+
+    par_bound = par_config.get("bounds", find_par_prop(modifiers, "par_bound"))
+    par_bound = read_par_bound(par_bound, par_size)
+
+    if all(m.is_null for m in modifiers):
+        return NullParameter(par_name, par_size)
+
+    if par_config.get("fixed"):
+        return FixedParameter(par_name, par_size, par_init)
+
+    return FreeParameter(par_name, par_size, par_init, par_bound)
 
 
 def find_params(config, modifiers):
     """
     @returns Parameters from data in configuration and hf model
     """
-    check_param_sizes(modifiers)
-    unique = {m.par_name: m for m in modifiers if not m.is_null}.values()
-    return [find_param(config, m) for m in unique]
+    groups = {m.par_name: [l for l in modifiers if l.par_name == m.par_name] for m in modifiers}
+    return [find_param(p, config.get(p, {}), m) for p, m in groups.items()]

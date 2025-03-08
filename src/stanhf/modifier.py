@@ -370,7 +370,7 @@ def find_constraints(modifiers):
     """
     @returns Find constraints that are applied once to modifiers
     """
-    par_name = {m.par_name for m in modifiers if m.constrained}
+    par_name = {m.par_name for m in modifiers if m.constrained and not m.is_null}
     return [StandardNormal(p) for p in par_name]
 
 
