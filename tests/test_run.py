@@ -21,4 +21,4 @@ def test_target():
     """
     convert = Convert(EXAMPLE)
     convert.validate_par_names()
-    convert.validate_target(RNG)
+    convert.validate_target(rng=RNG)

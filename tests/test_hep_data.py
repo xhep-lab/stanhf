@@ -74,4 +74,4 @@ def test_validate_hep_data(data):
 
     convert = Convert(path)
     convert.validate_par_names()
-    convert.validate_target(RNG)
+    convert.validate_target(rng=RNG)

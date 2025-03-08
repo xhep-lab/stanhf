@@ -32,4 +32,4 @@ def test_validate_hep_data_patch():
 
     convert = Convert(json_file, (patch, 0))
     convert.validate_par_names()
-    convert.validate_target(RNG)
+    convert.validate_target(rng=RNG)
