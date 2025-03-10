@@ -50,6 +50,9 @@ def cli(hf_file_name, build, validate_par_names, validate_target, patch):
     convert = Convert(hf_file_name, patch)
     click.echo(convert)
 
+    stan_path = install()
+    click.echo(f"- Stan installed at {stan_path}")
+
     stan_file_name, data_file_name, init_file_name = convert.write_to_disk()
     click.echo(
         f"- Stan files created at {stan_file_name}, {data_file_name} and {init_file_name}")
@@ -59,9 +62,6 @@ def cli(hf_file_name, build, validate_par_names, validate_target, patch):
         click.echo("- Validated parameter names")
 
     if build:
-        stan_path = install()
-        click.echo(f"- Stan installed at {stan_path}")
-
         local = os.path.join(stan_path, "build", "local")
         click.echo(f"- Build settings controlled at {local}")
 
