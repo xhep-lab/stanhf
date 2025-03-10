@@ -245,10 +245,10 @@ class Convert:
         channels, samples, non_null_modifiers, null_modifiers = self.model_size
         patch = f"'{self._patch.name}'" if self._patch else "no"
 
-        return (f"- pyhf file '{self.hf_file_name}' with {patch} patch applied\n"
-                f"{par} free parameters, {fixed} fixed parameters and {null} ignored null parameters\n"
-                f"{channels} channels with {samples} samples\n"
-                f"{non_null_modifiers} modifiers and {null_modifiers} ignored null modifiers")
+        return (f"pyhf file '{self.hf_file_name}' with {patch} patch applied:\n"
+                f"- {par} free parameters, {fixed} fixed parameters and {null} ignored null parameters\n"
+                f"- {channels} channels with {samples} samples\n"
+                f"- {non_null_modifiers} modifiers and {null_modifiers} ignored null modifiers")
 
     @cached_property
     def _data(self):
@@ -425,8 +425,10 @@ class Convert:
         a = perturb_param_file(init_file_name, rng)
         b = perturb_param_file(init_file_name, rng)
 
-        stanhf_delta = run_stanhf_model(b, data_file_name, exe_file_name) - run_stanhf_model(a, data_file_name, exe_file_name)
-        nhf_delta = run_pyhf_model(b, self._workspace) - run_pyhf_model(a, self._workspace)
+        stanhf_delta = run_stanhf_model(
+            b, data_file_name, exe_file_name) - run_stanhf_model(a, data_file_name, exe_file_name)
+        nhf_delta = run_pyhf_model(
+            b, self._workspace) - run_pyhf_model(a, self._workspace)
 
         if not np.isclose(stanhf_delta, nhf_delta):
             raise RuntimeError(

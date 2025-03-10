@@ -191,5 +191,6 @@ def find_params(config, modifiers):
     """
     @returns Parameters from data in configuration and hf model
     """
-    groups = {m.par_name: [l for l in modifiers if l.par_name == m.par_name] for m in modifiers}
+    groups = {m.par_name: [
+        l for l in modifiers if l.par_name == m.par_name] for m in modifiers}
     return [find_param(p, config.get(p, {}), m) for p, m in groups.items()]
