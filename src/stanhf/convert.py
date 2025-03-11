@@ -245,7 +245,7 @@ class Convert:
         channels, samples, non_null_modifiers, null_modifiers = self.model_size
         patch = f"'{self._patch.name}'" if self._patch else "no"
 
-        return (f"pyhf file '{self.hf_file_name}' with {patch} patch applied:\n"
+        return (f"hf file '{self.hf_file_name}' with {patch} patch applied:\n"
                 f"- {par} free parameters, {fixed} fixed parameters and {null} ignored null parameters\n"
                 f"- {channels} channels with {samples} samples\n"
                 f"- {non_null_modifiers} modifiers and {null_modifiers} ignored null modifiers")
