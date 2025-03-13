@@ -3,6 +3,7 @@ vector[2] expected_singlechannel_signal = nominal_singlechannel_signal;
 vector[2] expected_singlechannel_background = nominal_singlechannel_background;  
 vector[2] expected_secondchannel_signal = nominal_secondchannel_signal;  
 vector[2] expected_secondchannel_background = nominal_secondchannel_background;  
+real k_histosys = fix_k_histosys ? fixed_k_histosys : free_k_histosys[1];  
 expected_singlechannel_signal += term_interp(k_histosys, nominal_singlechannel_signal, lu_singlechannel_signal_histosys_k_histosys);  
 expected_singlechannel_signal *= factor_interp(k_normsys, lu_singlechannel_signal_normsys_k_normsys);  
 expected_singlechannel_signal .*= k_shapesys;  

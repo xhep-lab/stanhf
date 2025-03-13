@@ -1,5 +1,5 @@
 parameters{
-real<lower=lu_k_histosys.1, upper=lu_k_histosys.2> k_histosys;  
+array[1 - fix_k_histosys] real<lower=lu_k_histosys.1, upper=lu_k_histosys.2> free_k_histosys;  
 real<lower=lu_k_normsys.1, upper=lu_k_normsys.2> k_normsys;  
 vector<lower=lu_k_shapesys.1, upper=lu_k_shapesys.2>[2] k_shapesys;  
 vector<lower=lu_k_staterror.1, upper=lu_k_staterror.2>[2] k_staterror;  
