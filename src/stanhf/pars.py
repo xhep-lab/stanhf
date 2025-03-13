@@ -13,7 +13,8 @@ def get_pyhf_pars(pars, model):
     @returns pyhf parameters for calling target
     """
     init = get_pyhf_init(model)
-    pars = {k: pars.get(k, v) for k, v in init.items()}
+    strip_free_pars = {k.lstrip("free_"): v for k, v in pars.items()}
+    pars = {k: strip_free_pars.get(k, v) for k, v in init.items()}
     return flatten(pars[k] for k in model.config.par_order)
 
 

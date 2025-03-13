@@ -15,7 +15,7 @@ import pyhf
 from cmdstanpy import format_stan_file, write_stan_json, compile_stan_file
 
 from .channel import Channel
-from .config import find_measureds, find_params, FreeParameter, FixedParameter, NullParameter
+from .config import find_measureds, find_params, FreeParameter, FixedParameter, NullParameter, POI
 from .modifier import find_constraints, find_staterror, check_per_channel
 from .stanstr import block, flatten, format_json_file, read_observed
 from .pars import get_stan_par_names, get_pyhf_par_data
@@ -159,6 +159,17 @@ class Convert:
         return {p["name"]: p for p in pars}
 
     @cached_property
+    def _poi(self):
+        """
+        @returns POI
+        """
+        try:
+            return self._workspace["measurements"][0]["config"]["poi"]
+        except (KeyError, IndexError):
+            warnings.warn("no configuration data found")
+            return None
+
+    @cached_property
     def _measureds(self):
         """
         @returns Measurements for Stan program
@@ -170,7 +181,7 @@ class Convert:
         """
         @returns Parameters for Stan program
         """
-        return find_params(self._config, self._modifiers)
+        return find_params(self._poi, self._config, self._modifiers)
 
     @cached_property
     def _constraints(self):
@@ -207,7 +218,7 @@ class Convert:
         """
         @returns Names of parameters, fixed parameters and null parameters
         """
-        par = [p for p in self._pars if isinstance(p, FreeParameter)]
+        par = [p for p in self._pars if isinstance(p, (POI, FreeParameter))]
         fixed = [p for p in self._pars if isinstance(p, FixedParameter)]
         null = [p for p in self._pars if isinstance(p, NullParameter)]
         return par, fixed, null
@@ -255,8 +266,8 @@ class Convert:
         """
         @returns Representation of all elements in Stan program
         """
-        return self._samples + self._measureds + self._non_null_modifiers + \
-            self._pars + self._channels + self._constraints + self._staterror
+        return self._samples + self._pars + self._measureds + self._non_null_modifiers + \
+            self._channels + self._constraints + self._staterror
 
     def functions_block(self):
         """
@@ -446,7 +457,8 @@ class Convert:
             stan_file_name = self.write_stan_file()
 
         pyhf_par_data = get_pyhf_par_data(self._workspace)
-        stanhf_par_data = {m.par_name: max(1, m.par_size) for m in self._pars}
+        stanhf_par_data = {m.par_name.lstrip("free_"): max(
+            1, m.par_size) for m in self._pars}
 
         if stanhf_par_data != pyhf_par_data:
             raise RuntimeError(
@@ -454,8 +466,9 @@ class Convert:
                 f"Stanhf = {stanhf_par_data}\n"
                 f"pyhf = {pyhf_par_data}")
 
-        stanhf_par_names = self.par_names[0]
-        stan_par_names = get_stan_par_names(stan_file_name)
+        stanhf_par_names = sorted(self.par_names[0])
+        stan_par_names = sorted([p.lstrip("free_")
+                                for p in get_stan_par_names(stan_file_name)])
 
         if set(stanhf_par_names) != set(stan_par_names):
             raise RuntimeError(

@@ -97,6 +97,69 @@ class FreeParameter(Stan):
         return {self.par_bound_name: self.par_bound}
 
 
+class POI(Stan):
+    """
+    Declare a parameter that is the parameter of interest
+    """
+
+    def __init__(self, par_name, par_size, par_init, par_bound):
+        """
+        @param par_name Name of parameter
+        """
+        self.par_name = par_name
+        self.par_size = par_size
+
+        if self.par_size != 0:
+            raise RuntimeError("POI must be a scalar")
+
+        self.par_init = par_init
+        self.par_bound = par_bound
+        self.par_bound_name = join("lu", self.par_name)
+        self.free_par_name = join("free", self.par_name)
+        self.fixed_par_name = join("fixed", self.par_name)
+        self.fix_flag = join("fix", self.par_name)
+
+    @add_metadata_comment
+    def stan_pars(self):
+        """
+        @returns Declare parameter
+        """
+        bound = f"<lower={self.par_bound_name}.1, upper={self.par_bound_name}.2>"
+        return f"array[1 - {self.fix_flag}] real{bound} {self.free_par_name};"
+
+    @add_metadata_comment
+    def stan_trans_pars(self):
+        """
+        @returns Declare parameter
+        """
+        return f"real {self.par_name} = {self.fix_flag} ? {self.fixed_par_name} : {self.free_par_name}[1];"
+
+    @add_metadata_entry
+    def stan_init_card(self):
+        """
+        @returns Initialization or default for parameter
+        """
+        return {self.free_par_name: [self.par_init]}
+
+    @add_metadata_comment
+    def stan_data(self):
+        """
+        @returns Declare lower and upper bound for parameter
+        """
+        return f"""
+                int<lower=0, upper=1> {self.fix_flag};
+                real {self.fixed_par_name};
+                tuple(real, real) {self.par_bound_name};
+                """
+
+    @add_metadata_entry
+    def stan_data_card(self):
+        """
+        @returns Data for bounds for parameter
+        """
+        return {self.par_bound_name: self.par_bound, self.fix_flag: False, self.fixed_par_name: self.par_init}
+
+
 class FixedParameter(Stan):
     """
     Declare a fixed parameter
@@ -166,7 +229,7 @@ def find_par_prop(modifiers, prop):
     return d.pop()
 
 
-def find_param(par_name, par_config, modifiers):
+def find_param(poi, par_name, par_config, modifiers):
     """
     @returns Parameter bounds from modifiers
     """
@@ -184,13 +247,16 @@ def find_param(par_name, par_config, modifiers):
     if par_config.get("fixed"):
         return FixedParameter(par_name, par_size, par_init)
 
+    if par_name == poi:
+        return POI(par_name, par_size, par_init, par_bound)
+
     return FreeParameter(par_name, par_size, par_init, par_bound)
 
 
-def find_params(config, modifiers):
+def find_params(poi, config, modifiers):
     """
     @returns Parameters from data in configuration and hf model
     """
     groups = {m.par_name: [
         l for l in modifiers if l.par_name == m.par_name] for m in modifiers}
-    return [find_param(p, config.get(p, {}), m) for p, m in groups.items()]
+    return [find_param(poi, p, config.get(p, {}), m) for p, m in groups.items()]
