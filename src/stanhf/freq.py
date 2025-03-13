@@ -13,7 +13,7 @@ import cmdstanpy
 
 class StanOptimizer:
     """
-    Optimize Stan model using Stan's built in optimizers
+    Optimize Stan model using Stan's built in optimizer
     """
 
     name = "Stan optimize"
@@ -22,12 +22,16 @@ class StanOptimizer:
     def minimize(_objective,
                  data,
                  pdf,
-                 inits,
+                 _inits,
                  _bounds,
                  fixed_vals=None,
                  return_fitted_val=False,
                  return_result_obj=False,
                  **_kwargs):
+
+        assert _objective is None or _objective == pyhf.infer.mle.twice_nll
+        assert _inits is None or _inits == pdf.config.suggested_init() or _inits[0] == fixed_vals[0][1]
+        assert _bounds is None or _bounds == pdf.config.suggested_bounds()
 
         poi_name = pdf.poi_name()
         inits = pdf.inits()
@@ -105,7 +109,7 @@ class MockModel:
             None,
             self.data(),
             self,
-            self.inits(),
+            None,
             None,
             fixed_vals=fixed_vals,
             return_result_obj=True)[1]
@@ -130,8 +134,13 @@ class MockModel:
         return None
 
 
-def set_pyhf_stan():
+class set_pyhf_stan:
     """
     Sets pyhf backend to be Stan; this works only for the mocked models
     """
-    pyhf.set_backend("numpy", custom_optimizer=StanOptimizer)
+    def __init__(self):
+        self.org = pyhf.get_backend()
+    def __enter__(self):
+        pyhf.set_backend("numpy", custom_optimizer=StanOptimizer)
+    def __exit__(self, *args, **kwargs):
+        pyhf.set_backend(*self.org)
