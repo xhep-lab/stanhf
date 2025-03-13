@@ -28,7 +28,7 @@ def block(name, data):
     """
     if data is None:
         return None
-        
+
     if isinstance(data, list):
         data = "\n".join([d for d in data if d is not None])
 
