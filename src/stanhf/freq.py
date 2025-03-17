@@ -16,7 +16,7 @@ class StanOptimizer:
     Optimize Stan model using Stan's built in optimizer
     """
 
-    name = "Stan optimize"
+    name = "Stan optimizer"
 
     @staticmethod
     def minimize(_objective,
@@ -29,8 +29,9 @@ class StanOptimizer:
                  return_result_obj=False,
                  **_kwargs):
 
-        assert _objective is None or _objective == pyhf.infer.mle.twice_nll
-        assert _inits is None or _inits == pdf.config.suggested_init() or _inits[0] == fixed_vals[0][1]
+        assert _objective is None or _objective is pyhf.infer.mle.twice_nll
+        assert _inits is None or _inits == pdf.config.suggested_init(
+        ) or _inits[0] == fixed_vals[0][1]
         assert _bounds is None or _bounds == pdf.config.suggested_bounds()
 
         poi_name = pdf.poi_name()
@@ -83,11 +84,10 @@ class MockModel:
     Mock of pyhf model
     """
 
-    def __init__(self, stan_file, data_file, init_file, asimov_file=None):
+    def __init__(self, stan_file, data_file, init_file):
         self.data_file = data_file
         self.stan_file = stan_file
         self.init_file = init_file
-        self.asimov_file = asimov_file or data_file
         self.config = MockConfig()
         self.model = cmdstanpy.CmdStanModel(stan_file=stan_file)
 
@@ -130,7 +130,7 @@ class MockModel:
         """
         for k in self.data():
             if k.startswith("fix_"):
-                return k.strip("fix_")
+                return k[len("fix_"):]
         return None
 
 
@@ -138,9 +138,12 @@ class set_pyhf_stan:
     """
     Sets pyhf backend to be Stan; this works only for the mocked models
     """
+
     def __init__(self):
         self.org = pyhf.get_backend()
+
     def __enter__(self):
         pyhf.set_backend("numpy", custom_optimizer=StanOptimizer)
+
     def __exit__(self, *args, **kwargs):
         pyhf.set_backend(*self.org)
