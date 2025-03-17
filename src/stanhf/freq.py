@@ -11,6 +11,27 @@ import pyhf
 import cmdstanpy
 
 
+def run(pdf, data, bounds, inits, fixed_vals):
+    """
+    @returns Stan optimize result
+    """
+    _inits = pdf.config.inits.copy()
+    _data = data.copy()
+    bounds = bounds or pdf.config.suggested_bounds()
+    inits = inits or pdf.config.suggested_init()
+    poi_name = pdf.config.poi_name
+
+    if fixed_vals:
+        _data[f"fix_{poi_name}"] = 1
+        _data[f"fixed_{poi_name}"] = fixed_vals[0][1]
+        _inits[f"free_{poi_name}"] = []
+    else:
+        _data[f"lu_{poi_name}"] = (bounds[0][0], bounds[0][1])
+        _inits[f"free_{poi_name}"] = inits
+
+    return pdf.model.optimize(data=_data, inits=_inits)
+
+
 class StanOptimizer:
     """
     Optimize Stan model using Stan's built in optimizer
@@ -22,34 +43,26 @@ class StanOptimizer:
     def minimize(_objective,
                  data,
                  pdf,
-                 _inits,
-                 _bounds,
+                 inits,
+                 bounds,
                  fixed_vals=None,
                  return_fitted_val=False,
                  return_result_obj=False,
                  **_kwargs):
 
         assert _objective is None or _objective is pyhf.infer.mle.twice_nll
-        assert _inits is None or _inits == pdf.config.suggested_init(
-        ) or _inits[0] == fixed_vals[0][1]
-        assert _bounds is None or _bounds == pdf.config.suggested_bounds()
 
-        poi_name = pdf.poi_name()
-        inits = pdf.inits()
-        data = data.copy()
-
-        if fixed_vals:
-            data[f"fix_{poi_name}"] = 1
-            data[f"fixed_{poi_name}"] = fixed_vals[0][1]
-            inits[f"free_{poi_name}"] = []
-
-        result = pdf.model.optimize(data=data, inits=inits)
+        result = run(pdf, data, bounds, inits, fixed_vals)
 
         two_nll = -2. * result.optimized_params_dict["lp__"]
         params = np.array(result.optimized_params_np)
 
-        if poi_name:
-            params[pdf.config.poi_index] = result.optimized_params_dict[poi_name]
+        # swap elements so that poi in expected place
+
+        poi_fit = result.optimized_params_dict[pdf.config.poi_name]
+        poi_index = np.where(params == poi_fit)[0][0]
+        params[[poi_index, pdf.config.poi_index]
+               ] = params[[pdf.config.poi_index, poi_index]]
 
         _returns = [params]
 
@@ -69,14 +82,42 @@ class MockConfig:
 
     poi_index = 0
 
+    def __init__(self, data_file, init_file):
+        self.data_file = data_file
+        self.init_file = init_file
+
+    @property
+    def inits(self):
+        with open(self.init_file, encoding="utf-8") as f:
+            return json.load(f)
+
+    @property
+    def data(self):
+        with open(self.data_file, encoding="utf-8") as f:
+            return json.load(f)
+
     def suggested_init(self):
-        return [0]
+        return self.inits[f"free_{self.poi_name}"]
 
     def suggested_bounds(self):
-        return [[0., np.inf]]
+        lu = self.data.get(f"lu_{self.poi_name}")
+        return [[lu["1"], lu["2"]]]
 
     def suggested_fixed(self):
-        return [0]
+        return [False]
+
+    def par_slice(self, _):
+        return slice(0, 1, 1)
+
+    @property
+    def poi_name(self):
+        """
+        @returns Name of POI from Stan model
+        """
+        for k in self.data:
+            if k.startswith("fix_"):
+                return k[len("fix_"):]
+        return None
 
 
 class MockModel:
@@ -85,19 +126,9 @@ class MockModel:
     """
 
     def __init__(self, stan_file, data_file, init_file):
-        self.data_file = data_file
         self.stan_file = stan_file
-        self.init_file = init_file
-        self.config = MockConfig()
+        self.config = MockConfig(data_file, init_file)
         self.model = cmdstanpy.CmdStanModel(stan_file=stan_file)
-
-    def data(self):
-        with open(self.data_file, encoding="utf-8") as f:
-            return json.load(f)
-
-    def inits(self):
-        with open(self.init_file, encoding="utf-8") as f:
-            return json.load(f)
 
     def expected_data(self, params):
         """
@@ -105,9 +136,10 @@ class MockModel:
         """
 
         fixed_vals = [(self.config.poi_index, params[self.config.poi_index])]
+        data = self.config.data.copy()
         result = StanOptimizer.minimize(
             None,
-            self.data(),
+            data,
             self,
             None,
             None,
@@ -115,7 +147,6 @@ class MockModel:
             return_result_obj=True)[1]
 
         params = result.stan_variables()
-        data = self.data()
 
         for k in params:
             if k.startswith("expected_"):
@@ -123,15 +154,6 @@ class MockModel:
                 data[n] = np.floor(params[k]).astype(int)
 
         return data
-
-    def poi_name(self):
-        """
-        @returns Name of POI from Stan model
-        """
-        for k in self.data():
-            if k.startswith("fix_"):
-                return k[len("fix_"):]
-        return None
 
 
 class set_pyhf_stan:

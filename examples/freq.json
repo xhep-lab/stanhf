@@ -1,0 +1,26 @@
+{
+    "channels": [
+        { "name": "singlechannel",
+          "samples": [
+            { "name": "background",
+              "data": [50.0, 60.0],
+              "modifiers": [
+                { "name": "mu", "type": "normsys", "data": {"hi": 1.1, "lo": 0.9} }
+              ]
+            }
+          ]
+        }
+    ],
+    "observations": [
+        { "name": "singlechannel", "data": [44.0, 72.0] }
+    ],
+    "measurements": [
+        { "name": "Measurement", "config":
+          {"poi": "mu", "parameters": [ 
+            { "name":"mu", "bounds": [[-10.0, 10.0]], "inits": [0.0] }
+          ]
+          }
+        }
+    ],
+    "version": "1.0.0"
+}
