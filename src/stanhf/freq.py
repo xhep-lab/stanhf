@@ -1,6 +1,8 @@
 """
 Frequentist inference using pyhf
 ================================
+
+pyhf sees a one-dimensional version of the full model, with the POI in index 0
 """
 
 import json
@@ -49,8 +51,11 @@ class StanOptimizer:
                  return_fitted_val=False,
                  return_result_obj=False,
                  **_kwargs):
-
+        """
+        Signature matches pyhf optimizers. Works in tandem with the MockModel
+        """
         assert _objective is None or _objective is pyhf.infer.mle.twice_nll
+        assert isinstance(pdf, MockModel)
 
         result = run(pdf, data, bounds, inits, fixed_vals)
 
@@ -77,7 +82,9 @@ class StanOptimizer:
 
 class MockConfig:
     """
-    Mock of pyhf config object. The contents are not used
+    Mock of pyhf config object
+
+    Reads bounds, initial values, POI etc from the Stan json files
     """
 
     poi_index = 0
@@ -117,16 +124,16 @@ class MockConfig:
         for k in self.data:
             if k.startswith("fix_"):
                 return k[len("fix_"):]
-        return None
+
+        raise RuntimeError("Could not find a POI; did you declare one?")
 
 
 class MockModel:
     """
-    Mock of pyhf model
+    Mock of pyhf model that works in tandem with the StanOptimize optimizer
     """
 
     def __init__(self, stan_file, data_file, init_file):
-        self.stan_file = stan_file
         self.config = MockConfig(data_file, init_file)
         self.model = cmdstanpy.CmdStanModel(stan_file=stan_file)
 
@@ -134,7 +141,6 @@ class MockModel:
         """
         Generate expected data for a given set of parameters
         """
-
         fixed_vals = [(self.config.poi_index, params[self.config.poi_index])]
         data = self.config.data.copy()
         result = StanOptimizer.minimize(
