@@ -52,10 +52,10 @@ class StanOptimizer:
                  return_result_obj=False,
                  **_kwargs):
         """
-        Signature matches pyhf optimizers. Works in tandem with the MockModel
+        Signature matches pyhf optimizers. Works in tandem with the MockPyhfModel
         """
         assert _objective is None or _objective is pyhf.infer.mle.twice_nll
-        assert isinstance(pdf, MockModel)
+        assert isinstance(pdf, MockPyhfModel)
 
         result = run(pdf, data, bounds, inits, fixed_vals)
 
@@ -80,7 +80,7 @@ class StanOptimizer:
         return tuple(_returns) if len(_returns) > 1 else _returns[0]
 
 
-class MockConfig:
+class MockPyhfConfig:
     """
     Mock of pyhf config object
 
@@ -128,13 +128,13 @@ class MockConfig:
         raise RuntimeError("Could not find a POI; did you declare one?")
 
 
-class MockModel:
+class MockPyhfModel:
     """
     Mock of pyhf model that works in tandem with the StanOptimize optimizer
     """
 
     def __init__(self, stan_file, data_file, init_file):
-        self.config = MockConfig(data_file, init_file)
+        self.config = MockPyhfConfig(data_file, init_file)
         self.model = cmdstanpy.CmdStanModel(stan_file=stan_file)
 
     def expected_data(self, params):
@@ -162,7 +162,7 @@ class MockModel:
         return data
 
 
-class set_pyhf_stan:
+class mock_pyhf_backend:
     """
     Sets pyhf backend to be Stan; this works only for the mocked models
     """

@@ -9,7 +9,7 @@ import numpy as np
 import pyhf
 
 from stanhf import Convert
-from stanhf.freq import MockModel, set_pyhf_stan
+from stanhf.freq import MockPyhfModel, mock_pyhf_backend
 
 
 
@@ -35,9 +35,9 @@ def shf_upper_limits(json_file):
     """
     convert = Convert(json_file)
     stan_file_name, data_file_name, init_file_name = convert.write_to_disk()
-    model = MockModel(stan_file_name, data_file_name, init_file_name)
+    model = MockPyhfModel(stan_file_name, data_file_name, init_file_name)
 
-    with set_pyhf_stan():
+    with mock_pyhf_backend():
         obs_limit, exp_limits, _ = pyhf.infer.intervals.upper_limits.upper_limit(
             model.config.data, model, level=0.05, return_results=True
         )
