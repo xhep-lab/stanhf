@@ -41,7 +41,7 @@ def print_cmdstan_path(ctx, _, value):
 @click.option('--patch', default=None, nargs=2, type=(click.Path(exists=True), click.IntRange(0)))
 def cli(hf_file_name, build, validate_par_names, validate_target, patch):
     """
-    Convert, build and validate HF_JSON_FILE_NAME as a Stan model.
+    Convert, build and validate HF_FILE_NAME as a Stan model.
     """
     if validate_target and not build:
         warnings.warn("Cannot validate target as not building")
