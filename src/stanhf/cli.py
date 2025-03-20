@@ -37,11 +37,12 @@ def print_cmdstan_path(ctx, _, value):
 @click.option('--validate-target/--no-validate-target', default=True,
               help="Validate Stan program target.")
 @click.option('--cmdstan-path', is_flag=True, callback=print_cmdstan_path,
-              expose_value=False, is_eager=True)
-@click.option('--patch', default=None, nargs=2, type=(click.Path(exists=True), click.IntRange(0)))
+              expose_value=False, is_eager=True, help="Show path to cmdstan.")
+@click.option('--patch', type=(click.Path(exists=True), click.IntRange(0)),
+              default=None, nargs=2, help="Apply a patch to the model.")
 def cli(hf_file_name, build, validate_par_names, validate_target, patch):
     """
-    Convert, build and validate HF_FILE_NAME as a Stan model.
+    Convert, build and validate a histfactory json file HF_FILE_NAME as a Stan model.
     """
     if validate_target and not build:
         warnings.warn("Cannot validate target as not building")
