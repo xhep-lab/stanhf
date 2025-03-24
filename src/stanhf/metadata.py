@@ -46,7 +46,7 @@ def add_metadata_comment(func):
     @wraps(func)
     def wrapped(other, *args, **kwargs):
         res = func(other, *args, **kwargs)
-        lines = [f"{r} // {log}" for r in res.split("\n")]
+        lines = [f"{r} // {log}" for r in res.split("\n") if r.strip()]
         return "\n".join(lines)
 
     return wrapped
