@@ -5,7 +5,7 @@ Deal with parameter naming conventions across Stan and pyhf
 
 from cmdstanpy import compilation
 
-from .stanstr import flatten
+from .stanstr import flatten, remove_prefix
 
 
 def get_pyhf_pars(pars, model):
@@ -13,7 +13,7 @@ def get_pyhf_pars(pars, model):
     @returns pyhf parameters for calling target
     """
     init = get_pyhf_init(model)
-    strip_free_pars = {k.lstrip("free_"): v for k, v in pars.items()}
+    strip_free_pars = {remove_prefix(k, "free_"): v for k, v in pars.items()}
     pars = {k: strip_free_pars.get(k, v) for k, v in init.items()}
     return flatten(pars[k] for k in model.config.par_order)
 

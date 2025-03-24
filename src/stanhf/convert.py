@@ -17,7 +17,7 @@ from cmdstanpy import format_stan_file, write_stan_json, compile_stan_file
 from .channel import Channel
 from .config import find_measureds, find_params, FreeParameter, FixedParameter, NullParameter, POI
 from .modifier import find_constraints, find_staterror, check_per_channel
-from .stanstr import block, flatten, format_json_file, read_observed
+from .stanstr import block, flatten, format_json_file, read_observed, remove_prefix
 from .pars import get_stan_par_names, get_pyhf_par_data
 from .metadata import merge_metadata
 from .run import perturb_param_file, run_pyhf_model, run_stanhf_model
@@ -446,7 +446,7 @@ class Convert:
                 f"no agreement in delta log-like:\n"
                 f"Stan = {stanhf_delta}\n"
                 f"pyhf = {nhf_delta}\n"
-                f"delta = {stanhf_delta - nhf_delta}\n"
+                f"difference = {stanhf_delta - nhf_delta}\n"
                 f"for a = {a} and b = {b}")
 
     def validate_par_names(self, stan_file_name=None):
@@ -457,21 +457,23 @@ class Convert:
             stan_file_name = self.write_stan_file()
 
         pyhf_par_data = get_pyhf_par_data(self._workspace)
-        stanhf_par_data = {m.par_name.lstrip("free_"): max(
+        stanhf_par_data = {remove_prefix(m.par_name, "free_"): max(
             1, m.par_size) for m in self._pars}
 
         if stanhf_par_data != pyhf_par_data:
             raise RuntimeError(
                 "no agreement in parameter names & sizes:\n"
                 f"Stanhf = {stanhf_par_data}\n"
-                f"pyhf = {pyhf_par_data}")
+                f"pyhf = {pyhf_par_data}\n"
+                f"difference = {set(stanhf_par_data) ^ set(pyhf_par_data)}")
 
         stanhf_par_names = sorted(self.par_names[0])
-        stan_par_names = sorted([p.lstrip("free_")
+        stan_par_names = sorted([remove_prefix(p, "free_")
                                 for p in get_stan_par_names(stan_file_name)])
 
         if set(stanhf_par_names) != set(stan_par_names):
             raise RuntimeError(
                 "no agreement in parameter names:\n"
                 f"Stanhf = {stanhf_par_names}\n"
-                f"Stan = {stan_par_names}")
+                f"Stan = {stan_par_names}",
+                f"difference = {stanhf_par_names ^ stan_par_names}")

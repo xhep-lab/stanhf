@@ -14,6 +14,15 @@ def join(*name):
     return "_".join(name)
 
 
+def remove_prefix(name, prefix):
+    """
+    @returns Name with a prefix removed
+    """
+    if name.startswith(prefix):
+        return name[len(prefix):]
+    return name
+
+
 def add_to_target(dist, var, *args):
     """
     @returns Stan contribution to target
