@@ -31,6 +31,7 @@ STANPATH=$(python -c "from cmdstanpy import cmdstan_path; print(cmdstan_path())"
 cd ${STANPATH} && make bin/stansummary
 ${STANPATH}/bin/stansummary $(ls *.csv)
 ```
+
 ### Python & arviz
 
 or using arviz in Python
@@ -43,6 +44,7 @@ print(az.summary(data))
 az.plot_density(data)
 plt.show()
 ```
+
 ### R and shinystan
 
 or using shinystan in R
