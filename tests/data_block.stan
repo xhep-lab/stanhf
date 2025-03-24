@@ -3,11 +3,9 @@ vector[2] nominal_singlechannel_signal;
 vector[2] nominal_singlechannel_background;  
 vector[2] nominal_secondchannel_signal;  
 vector[2] nominal_secondchannel_background;  
-  
                 int<lower=0, upper=1> fix_k_histosys;  
                 real fixed_k_histosys;  
                 tuple(real, real) lu_k_histosys;  
-                  
 tuple(real, real) lu_k_normsys;  
 tuple(vector[2], vector[2]) lu_k_shapesys;  
 tuple(vector[2], vector[2]) lu_k_staterror;  
