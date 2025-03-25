@@ -8,6 +8,8 @@ import os
 import warnings
 
 import click
+from click_help_colors import HelpColorsCommand, version_option
+
 from cmdstanpy import cmdstan_path
 
 from .run import install
@@ -15,7 +17,7 @@ from .convert import Convert
 
 
 VERSION = importlib.metadata.version(__package__)
-
+CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
 def print_cmdstan_path(ctx, _, value):
     """
@@ -27,9 +29,16 @@ def print_cmdstan_path(ctx, _, value):
     ctx.exit()
 
 
-@click.command()
+@click.command(cls=HelpColorsCommand,
+               help_headers_color='yellow',
+               help_options_color='green',
+               context_settings=CONTEXT_SETTINGS,
+               epilog="Check out https://github.com/xhep-lab/stanhf for more details or to report issues")
 @click.argument('hf_file_name', type=click.Path(exists=True))
-@click.version_option(VERSION, message="%(version)s")
+@version_option(VERSION,
+                prog_name="stanhf",
+                message="%(prog)s version %(version)s",
+                version_color='green')
 @click.option('--build/--no-build', default=True,
               help="Build Stan program.")
 @click.option('--validate-par-names/--no-validate-par-names', default=True,
@@ -39,7 +48,7 @@ def print_cmdstan_path(ctx, _, value):
 @click.option('--cmdstan-path', is_flag=True, callback=print_cmdstan_path,
               expose_value=False, is_eager=True, help="Show path to cmdstan.")
 @click.option('--patch', type=(click.Path(exists=True), click.IntRange(0)),
-              default=None, nargs=2, help="Apply a patch to the model.")
+              default=None, nargs=2, help="Apply a patch to the model.",  metavar='<path to patchset> <number>')
 def cli(hf_file_name, build, validate_par_names, validate_target, patch):
     """
     Convert, build and validate a histfactory json file HF_FILE_NAME as a Stan model.

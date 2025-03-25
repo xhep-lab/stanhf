@@ -18,6 +18,7 @@ classifiers = [
 ]
 dependencies = [
     "click",
+    "click_help_colors",
     "cmdstanpy",
     "numpy",
     "pyhf[contrib]"

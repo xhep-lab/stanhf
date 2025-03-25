@@ -76,7 +76,12 @@ class Convert:
         @returns Workspace, patched if necessary
         """
         with open(self.hf_file_name, encoding="utf-8") as hf_file:
-            workspace = pyhf.Workspace(json.load(hf_file))
+            try:
+                hf = json.load(hf_file)
+            except json.decoder.JSONDecodeError as e:
+                raise IOError(f"could not read {self.hf_file_name} - is it a valid json file?") from e
+
+        workspace = pyhf.Workspace(hf)
 
         if self._patch is None:
             return workspace
