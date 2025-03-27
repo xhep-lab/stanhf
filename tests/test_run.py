@@ -11,7 +11,7 @@ from stanhf import Convert
 
 
 CWD = os.path.dirname(os.path.realpath(__file__))
-EXAMPLE = os.path.normpath(os.path.join(CWD, "..", "examples", "example.json"))
+EXAMPLE = os.path.normpath(os.path.join(CWD, "..", "examples", "test.json"))
 RNG = np.random.default_rng(111)
 
 

@@ -12,7 +12,7 @@ from stanhf import Convert
 
 
 CWD = os.path.dirname(os.path.realpath(__file__))
-EXAMPLE = os.path.normpath(os.path.join(CWD, "..", "examples", "example.json"))
+EXAMPLE = os.path.normpath(os.path.join(CWD, "..", "examples", "test.json"))
 
 CON = Convert(EXAMPLE)
 BLOCKS = ["functions_block", "data_block",

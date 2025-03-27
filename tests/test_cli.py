@@ -10,7 +10,7 @@ from stanhf.cli import cli
 
 
 CWD = os.path.dirname(os.path.realpath(__file__))
-EXAMPLE = os.path.normpath(os.path.join(CWD, "..", "examples", "example.json"))
+EXAMPLE = os.path.normpath(os.path.join(CWD, "..", "examples", "test.json"))
 
 
 def test_cli():

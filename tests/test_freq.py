@@ -5,12 +5,16 @@ Test Stan interface to pyhf
 
 import json
 import numpy as np
+import os
 
 import pyhf
 
 from stanhf import Convert
-from stanhf.freq import MockPyhfModel, mock_pyhf_backend
+from stanhf.contrib.freq import MockPyhfModel, mock_pyhf_backend
 
+
+CWD = os.path.dirname(os.path.realpath(__file__))
+EXAMPLE = os.path.normpath(os.path.join(CWD, "..", "examples", "model.json"))
 
 
 def nhf_upper_limits(json_file):
@@ -49,10 +53,9 @@ def test_freq():
     """
     Compare native pyhf results to those using Stan interface
     """
-    json_file = "examples/freq.json"
 
-    nhf_obs_limit, nhf_exp_limits = nhf_upper_limits(json_file)
-    shf_obs_limit, shf_exp_limits = shf_upper_limits(json_file)
+    nhf_obs_limit, nhf_exp_limits = nhf_upper_limits(EXAMPLE)
+    shf_obs_limit, shf_exp_limits = shf_upper_limits(EXAMPLE)
 
     assert np.isclose(nhf_obs_limit, shf_obs_limit, rtol=1e-3)
     assert np.all(np.isclose(nhf_exp_limits, shf_exp_limits, rtol=1e-3))
