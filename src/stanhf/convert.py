@@ -79,7 +79,8 @@ class Convert:
             try:
                 hf = json.load(hf_file)
             except json.decoder.JSONDecodeError as e:
-                raise IOError(f"could not read {self.hf_file_name} - is it a valid json file?") from e
+                raise IOError(
+                    f"could not read {self.hf_file_name} - is it a valid json file?") from e
 
         workspace = pyhf.Workspace(hf)
 

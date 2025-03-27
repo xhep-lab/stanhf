@@ -19,6 +19,7 @@ from .convert import Convert
 VERSION = importlib.metadata.version(__package__)
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
+
 def print_cmdstan_path(ctx, _, value):
     """
     Print cmdstan path

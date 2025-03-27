@@ -16,22 +16,23 @@ def compute_bfs(idata, var_name, prior, ref_val=0.):
     :param var_name: Variance name for Bayes factor surface
     :param prior: Prior
     :param ref_val: Reference value to compute Bayes factor surface wrt
-    
+
     :returns: grid and Bayes factor surface values at grid
     """
     posterior = extract(idata, var_names=var_name).values
     posterior_grid, posterior_pdf = _kde_linear(posterior)
     prior_grid, prior_pdf = _kde_linear(prior)
-    
+
     posterior_at_ref_val = np.interp(ref_val, posterior_grid, posterior_pdf)
     prior_at_ref_val = np.interp(ref_val, prior_grid, prior_pdf)
-    
+
     prior_at_posterior_grid = np.interp(posterior_grid, prior_grid, prior_pdf)
 
-    bfs = (posterior_pdf / posterior_at_ref_val) / (prior_at_posterior_grid / prior_at_ref_val)
-    
+    bfs = (posterior_pdf / posterior_at_ref_val) / \
+        (prior_at_posterior_grid / prior_at_ref_val)
+
     return posterior_grid, bfs
-    
+
 
 def plot_bfs(idata, var_name, prior, ref_val=0., ax=None, show=False, mark=None):
     """
@@ -51,12 +52,13 @@ def plot_bfs(idata, var_name, prior, ref_val=0., ax=None, show=False, mark=None)
     ax.set_ylabel(f"BFS versus {var_name} = {ref_val}")
 
     trans = ax.get_xaxis_transform()
-        
+
     for p, m in zip(par, mark):
         plt.axvline(p, linestyle=':', color='C1')
-        plt.text(p, 0.5, f'BFS = {m}', rotation=270, transform=trans, color='C1', va="bottom")
+        plt.text(p, 0.5, f'BFS = {m}', rotation=270,
+                 transform=trans, color='C1', va="bottom")
 
     if show:
         plt.show()
-        
+
     return grid, bfs, ax
