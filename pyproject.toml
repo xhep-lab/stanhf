@@ -17,6 +17,8 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
+    "arviz",
+    "matplotlib",
     "click",
     "click_help_colors",
     "cmdstanpy",
