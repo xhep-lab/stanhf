@@ -88,6 +88,7 @@ class MockPyhfConfig:
     """
 
     poi_index = 0
+    npars = 0
 
     def __init__(self, data_file, init_file):
         self.data_file = data_file
