@@ -7,4 +7,8 @@ examples/example
 examples/example.stan
 examples/example_data.json
 examples/example_init.json
+examples/model
+examples/model.stan
+examples/model_data.json
+examples/model_init.json
 *hepdata*
