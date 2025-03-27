@@ -39,7 +39,7 @@ or using arviz in Python
 import arviz as az
 import matplotlib.pyplot as plt
 
-data = az.from_cmdstan([f"output_{i + 1}.csv" for i in range(4)])
+data = az.from_cmdstan("output_*.csv")
 print(az.summary(data))
 az.plot_density(data)
 plt.show()
