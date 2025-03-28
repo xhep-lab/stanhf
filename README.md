@@ -29,6 +29,6 @@ for details. Try e.g.,
 
 This converts, compiles and validates the example model. The compiled model is a cmdstan executable. You can run the usual Stan algorithms (HMC, optimization etc) through this executable. 
 
-## Workflow
+## Workflows
 
 See [EXAMPLE.md](EXAMPLE.md) for a walkthrough of how to run and analyse outpus from a compiled Stan model.
