@@ -10,7 +10,7 @@ from arviz.stats.density_utils import _kde_linear
 from arviz.data.utils import extract
 
 
-def compute_bfs(idata, var_name, prior, ref_val=0.):
+def compute_bfs(idata, var_name, prior=None, ref_val=0.):
     """
     :param idata: arviz data
     :param var_name: Variance name for Bayes factor surface
@@ -21,20 +21,23 @@ def compute_bfs(idata, var_name, prior, ref_val=0.):
     """
     posterior = extract(idata, var_names=var_name).values
     posterior_grid, posterior_pdf = _kde_linear(posterior)
-    prior_grid, prior_pdf = _kde_linear(prior)
-
     posterior_at_ref_val = np.interp(ref_val, posterior_grid, posterior_pdf)
-    prior_at_ref_val = np.interp(ref_val, prior_grid, prior_pdf)
+    posterior_ratio = posterior_pdf / posterior_at_ref_val
 
-    prior_at_posterior_grid = np.interp(posterior_grid, prior_grid, prior_pdf)
+    if prior is not None:
+        prior_grid, prior_pdf = _kde_linear(prior)
+        prior_at_ref_val = np.interp(ref_val, prior_grid, prior_pdf)
+        prior_at_posterior_grid = np.interp(posterior_grid, prior_grid, prior_pdf)
+        prior_ratio = prior_at_posterior_grid / prior_at_ref_val
+    else:
+        prior_ratio = 1.
 
-    bfs = (posterior_pdf / posterior_at_ref_val) / \
-        (prior_at_posterior_grid / prior_at_ref_val)
+    bfs = posterior_ratio / prior_ratio
 
     return posterior_grid, bfs
 
 
-def plot_bfs(idata, var_name, prior, ref_val=0., ax=None, show=False, mark=None):
+def plot_bfs(idata, var_name, prior=None, ref_val=0., ax=None, show=False, mark=None):
     """
     Makes a plot of Bayes factor surface
     """
