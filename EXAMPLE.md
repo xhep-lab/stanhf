@@ -7,19 +7,21 @@
 </div>
 <br>
 
-
 ## Build 
 
 Convert hf model to Stan:
-
-    pipx install stanhf  # Install
-    stanhf ./examples/example.json  # Convert example
+```bash
+git clone https://github.com/xhep-lab/stanhf  # Obtain source code
+cd stanhf
+pip install .  # Install
+stanhf examples/model.json  # Convert example
+```
 
 ## Run
 
 Sample from the model, e.g., using HMC with 4 chains
 
-    examples/example sample num_chains=4 data file=examples/example_data.json init=examples/example_init.json
+    examples/model sample num_chains=4 data file=examples/model_data.json init=examples/model_init.json
 
 ## Analyse
 
@@ -41,8 +43,7 @@ import matplotlib.pyplot as plt
 
 data = az.from_cmdstan("output_*.csv")
 print(az.summary(data))
-az.plot_density(data)
-plt.show()
+az.plot_posterior(data, show=True)
 ```
 
 ### R and shinystan
