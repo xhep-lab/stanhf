@@ -13,7 +13,7 @@ We follow the histfactory specification as closely as possible and the target fu
 
 ## Install
 
-    pipx install stanhf
+    pip install stanhf
 
 At runtime, the first time you use stanhf it could install cmdstan if it isn't found. This is required to lint, validate and compile any Stan models, though stanhf can be used as a conversion tool without it.
 
