@@ -1,18 +1,22 @@
 {
     "channels": [
-        { "name": "singlechannel",
+        { "name": "channel",
           "samples": [
             { "name": "background",
               "data": [50.0, 60.0],
+              "modifiers": []
+            },
+            { "name": "signal",
+              "data": [5.0, 10.0],
               "modifiers": [
-                { "name": "mu", "type": "normsys", "data": {"hi": 1.1, "lo": 0.9} }
+                { "name": "mu", "type": "normfactor", "data": null}
               ]
             }
           ]
         }
     ],
     "observations": [
-        { "name": "singlechannel", "data": [44.0, 72.0] }
+        { "name": "channel", "data": [44.0, 62.0] }
     ],
     "measurements": [
         { "name": "Measurement", "config":

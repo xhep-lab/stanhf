@@ -7,7 +7,7 @@ where = ["src"]
 
 [project]
 name = "stanhf"
-version = "1.0.0"
+version = "1.1.0"
 authors = [{ name = "Andrew Fowlie", email = "andrew.j.fowlie@gmail.com" }]
 readme = "README.md"  
 requires-python = ">=3.8"
