@@ -9,7 +9,7 @@
             { "name": "signal",
               "data": [5.0, 10.0],
               "modifiers": [
-                { "name": "mu", "type": "normfactor", "data": null}
+                { "name": "mu", "type": "normsys", "data": {"hi": 1.1, "lo": 0.9}}
               ]
             }
           ]
