@@ -14,7 +14,7 @@ from stanhf.contrib.freq import MockPyhfModel, mock_pyhf_backend
 
 
 CWD = os.path.dirname(os.path.realpath(__file__))
-EXAMPLE = os.path.normpath(os.path.join(CWD, "..", "examples", "model.json"))
+EXAMPLE = os.path.normpath(os.path.join(CWD, "..", "examples", "normfactor.json"))
 
 
 def nhf_upper_limits(json_file):

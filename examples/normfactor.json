@@ -1,0 +1,30 @@
+{
+    "channels": [
+        { "name": "channel",
+          "samples": [
+            { "name": "background",
+              "data": [50.0, 60.0],
+              "modifiers": []
+            },
+            { "name": "signal",
+              "data": [5.0, 10.0],
+              "modifiers": [
+                { "name": "mu", "type": "normfactor", "data": null}
+              ]
+            }
+          ]
+        }
+    ],
+    "observations": [
+        { "name": "channel", "data": [44.0, 62.0] }
+    ],
+    "measurements": [
+        { "name": "Measurement", "config":
+          {"poi": "mu", "parameters": [ 
+            { "name":"mu", "bounds": [[0.0, 10.0]], "inits": [1.0] }
+          ]
+          }
+        }
+    ],
+    "version": "1.0.0"
+}

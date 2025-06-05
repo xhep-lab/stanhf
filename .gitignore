@@ -4,5 +4,6 @@ __pycache__/
 *.egg-info
 build/
 examples/
-!examples/model.json
+!examples/normfactor.json
+!examples/normsys.json
 !examples/test.json

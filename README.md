@@ -38,7 +38,7 @@ Stanhf consists of one CLI. See
 
 for details. Try e.g.,
 
-    stanhf ./examples/model.json
+    stanhf ./examples/normfactor.json
 
 This converts, compiles and validates the example model. The compiled model is a cmdstan executable. You can run the usual Stan algorithms (HMC, optimization etc) through this executable. 
 

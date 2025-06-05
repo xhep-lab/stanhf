@@ -14,14 +14,14 @@ Convert hf model to Stan:
 git clone https://github.com/xhep-lab/stanhf  # Obtain source code
 cd stanhf
 pip install .  # Install
-stanhf examples/model.json  # Convert example
+stanhf examples/normfactor.json  # Convert example
 ```
 
 ## Run
 
 Sample from the model, e.g., using HMC with 4 chains
 
-    examples/model sample num_chains=4 data file=examples/model_data.json init=examples/model_init.json
+    examples/normfactor sample num_chains=4 data file=examples/normfactor_data.json init=examples/normfactor_init.json
 
 ## Analyse
 
