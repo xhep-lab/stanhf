@@ -7,3 +7,4 @@ examples/
 !examples/normfactor.json
 !examples/normsys.json
 !examples/test.json
+!examples/tweak.json
